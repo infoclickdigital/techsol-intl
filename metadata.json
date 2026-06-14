@@ -1,0 +1,8 @@
+{
+  "name": "Techsol International",
+  "description": "Nepal's trusted supplier of premium food flavours, spice blends, functional ingredient systems, and processing machinery consulting.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

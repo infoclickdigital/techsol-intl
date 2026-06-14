@@ -1,0 +1,199 @@
+import type { Metadata } from "next";
+import { Inter, JetBrains_Mono } from "next/font/google";
+import "./globals.css";
+import Link from "next/link";
+import React from "react";
+import Logo from "@/components/Logo";
+import Chatbot from "@/components/Chatbot";
+import Header from "@/components/Header";
+import { Facebook, Instagram, Linkedin, Phone, Mail, MapPin, Building, Globe, Shield } from "lucide-react";
+import sql from "@/lib/db";
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-sans",
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono",
+});
+
+export const metadata: Metadata = {
+  title: "Techsol International | Industrial Food Processing Machinery & Automation",
+  description: "Nepal's premium industrial partner for Smart CCD Optical Sorters, Turnkey Mills, Liquid Processing, and SCADA Automation consoles. Optimized with global ISO grade mechanics.",
+  keywords: ["Color Sorter Nepal", "Rice Mill Machine Biratnagar", "Wheat Miller Kathmandu", "Liquid Packager Nepal", "SCADA automation Terai", "Techsol International Nepal"],
+};
+
+export default async function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  let facebook = "https://facebook.com";
+  let instagram = "https://instagram.com";
+  let linkedin = "https://linkedin.com";
+  let address = "Ward 14, Tinkune - Koteshwor Corridor, Tinkune, Kathmandu, Nepal";
+  let phone = "+977-1-5110291, +977-9851088461";
+  let email = "info@techsol.international";
+  let industrialCenters = "Tinkune (Kathmandu) & Mills Parkway (Biratnagar, Bhairahawa)";
+
+  if (process.env.DATABASE_URL || process.env.NODE_ENV === 'development') {
+    try {
+      const configs = await sql`SELECT key, value FROM techsol_config`;
+      if (configs && Array.isArray(configs)) {
+        configs.forEach((item: { key: string; value: string }) => {
+          if (item.key === 'social_facebook' && item.value?.trim()) facebook = item.value.trim();
+          if (item.key === 'social_instagram' && item.value?.trim()) instagram = item.value.trim();
+          if (item.key === 'social_linkedin' && item.value?.trim()) linkedin = item.value.trim();
+          if (item.key === 'contact_address' && item.value?.trim()) address = item.value.trim();
+          if (item.key === 'contact_phone' && item.value?.trim()) phone = item.value.trim();
+          if (item.key === 'contact_email' && item.value?.trim()) email = item.value.trim();
+          if (item.key === 'contact_industrial_centers' && item.value?.trim()) industrialCenters = item.value.trim();
+        });
+      }
+    } catch (err) {
+      console.warn("DB config fetch fallback inside layout:", err);
+    }
+  }
+
+  return (
+    <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable} overflow-x-clip w-full`}>
+      <body className="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col font-sans selection:bg-amber-500 selection:text-white overflow-x-clip w-full">
+        
+        {/* Responsive Navigation Navbar */}
+        <Header />
+
+        {/* Page Content */}
+        <main className="flex-1 bg-slate-50 flex flex-col justify-start">
+          {children}
+        </main>
+
+        {/* Full-site Floating AI Support Agent */}
+        <Chatbot />
+
+        {/* Corporate Footer with Social icons, Quick links and contact details */}
+        <footer className="bg-slate-950 text-slate-350 py-12 px-4 sm:px-8 border-t border-slate-900 select-text">
+          <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 text-sm">
+            
+            {/* Info Col (4 Cols) */}
+            <div className="md:col-span-4 space-y-5">
+              <Logo size="lg" className="brightness-110 contrast-115 grayscale-0 invert-0" />
+              <p className="text-xs text-slate-400 leading-relaxed font-sans max-w-sm">
+                Nepal’s preferred gateway for advanced optical photoelectric sortation plants, high-yield grain processing mills, liquid packaging, and central PLC logic orchestration. Fully integrated engineering workflows.
+              </p>
+              
+              {/* Social Media icons */}
+              <div className="flex items-center gap-3.5 pt-2">
+                <a 
+                  href={facebook} 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="p-2 bg-slate-900 hover:bg-amber-600 text-slate-400 hover:text-white transition-all rounded"
+                  id="footer-social-fb"
+                  aria-label="Facebook Link"
+                >
+                  <Facebook className="h-4 w-4" />
+                </a>
+                <a 
+                  href={instagram} 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="p-2 bg-slate-900 hover:bg-amber-600 text-slate-400 hover:text-white transition-all rounded"
+                  id="footer-social-ig"
+                  aria-label="Instagram Link"
+                >
+                  <Instagram className="h-4 w-4" />
+                </a>
+                <a 
+                  href={linkedin} 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="p-2 bg-slate-900 hover:bg-amber-600 text-slate-400 hover:text-white transition-all rounded"
+                  id="footer-social-ln"
+                  aria-label="LinkedIn Link"
+                >
+                  <Linkedin className="h-4 w-4" />
+                </a>
+              </div>
+            </div>
+
+            {/* Quick Links (4 Cols) */}
+            <div className="md:col-span-3 space-y-4">
+              <h4 className="text-xs font-bold uppercase tracking-wider font-mono text-amber-500">
+                Quick Navigation
+              </h4>
+              <ul className="space-y-2 text-xs text-slate-400">
+                <li>
+                  <Link href="/" className="hover:text-amber-500 hover:underline transition-all block">
+                    &raquo; Home Portal
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/about" className="hover:text-amber-500 hover:underline transition-all block">
+                    &raquo; Corporate Structure (About)
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/services" className="hover:text-amber-500 hover:underline transition-all block">
+                    &raquo; Engineering Services
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/products" className="hover:text-amber-500 hover:underline transition-all block">
+                    &raquo; Industrial Machinery Catalog
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/blogs" className="hover:text-amber-500 hover:underline transition-all block">
+                    &raquo; Tech Articles & Blogs
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/contact" className="hover:text-amber-500 hover:underline transition-all block">
+                    &raquo; Contact Headquarters
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            {/* Contacts Col (5 Cols) */}
+            <div className="md:col-span-5 space-y-4 font-sans text-xs">
+              <h4 className="text-xs font-bold uppercase tracking-wider font-mono text-amber-500">
+                Corporate Headquarters
+              </h4>
+              <div className="space-y-3 font-normal text-slate-400 leading-relaxed">
+                <div className="flex items-start gap-2.5">
+                  <MapPin className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
+                  <span>{address}</span>
+                </div>
+                <div className="flex items-start gap-2.5">
+                  <Phone className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
+                  <span>Direct Desk: {phone}</span>
+                </div>
+                <div className="flex items-start gap-2.5">
+                  <Mail className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
+                  <span>
+                    Primary Desk: <a href={`mailto:${email}`} className="hover:text-amber-500 hover:underline">{email}</a>
+                  </span>
+                </div>
+                <div className="flex items-start gap-2.5">
+                  <Building className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
+                  <span>Industrial Centers: {industrialCenters}</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <div className="max-w-7xl mx-auto border-t border-slate-900 mt-10 pt-6 flex flex-col md:flex-row items-center justify-between text-xs text-slate-500 gap-4">
+            <div>
+              &copy; 2026 Techsol International, Nepal. All rights registered reserved.
+            </div>
+          </div>
+        </footer>
+
+      </body>
+    </html>
+  );
+}
