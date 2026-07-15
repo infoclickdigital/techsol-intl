@@ -6,6 +6,7 @@ import React from "react";
 import Logo from "@/components/Logo";
 import Chatbot from "@/components/Chatbot";
 import Header from "@/components/Header";
+import ScrollToTop from "@/components/ScrollToTop";
 import { Facebook, Instagram, Linkedin, Phone, Mail, MapPin, Building, Globe, Shield } from "lucide-react";
 import sql from "@/lib/db";
 
@@ -22,38 +23,104 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "Techsol International | Industrial Food Processing Machinery & Automation",
   description: "Nepal's premium industrial partner for Smart CCD Optical Sorters, Turnkey Mills, Liquid Processing, and SCADA Automation consoles. Optimized with global ISO grade mechanics.",
-  keywords: ["Color Sorter Nepal", "Rice Mill Machine Biratnagar", "Wheat Miller Kathmandu", "Liquid Packager Nepal", "SCADA automation Terai", "Techsol International Nepal"],
+  keywords: [
+    "Color Sorter Nepal", 
+    "Rice Mill Machine Biratnagar", 
+    "Wheat Miller Kathmandu", 
+    "Liquid Packager Nepal", 
+    "SCADA automation Terai", 
+    "Techsol International Nepal",
+    "Food Flavours Nepal",
+    "Spice Seasoning Kathmandu"
+  ],
+  alternates: {
+    canonical: "https://techsol.international",
+  },
+  openGraph: {
+    title: "Techsol International | Industrial Food Processing Machinery & Automation",
+    description: "Nepal's premium industrial partner for Smart CCD Optical Sorters, Turnkey Mills, Liquid Processing, and SCADA Automation consoles. Optimized with global ISO grade mechanics.",
+    url: "https://techsol.international",
+    siteName: "Techsol International",
+    images: [
+      {
+        url: "/icon.jpg",
+        width: 512,
+        height: 512,
+        alt: "Techsol International Brand Icon",
+      },
+    ],
+    locale: "en_NP",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "Techsol International | Industrial Food Processing Machinery & Automation",
+    description: "Nepal's premium industrial partner for Smart CCD Optical Sorters, Turnkey Mills, Liquid Processing, and SCADA Automation consoles. Optimized with global ISO grade mechanics.",
+    images: ["/icon.jpg"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
 };
+
+// Server-side in-memory cache for layout configurations to maximize performance
+let serverCachedConfigs: Record<string, string> | null = null;
+let serverLastFetched = 0;
+const SERVER_CACHE_TTL = 300000; // 5 minutes in milliseconds
 
 export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  let facebook = "https://facebook.com";
-  let instagram = "https://instagram.com";
-  let linkedin = "https://linkedin.com";
-  let address = "Ward 14, Tinkune - Koteshwor Corridor, Tinkune, Kathmandu, Nepal";
-  let phone = "+977-1-5110291, +977-9851088461";
+  let facebook = "https://facebook.com/techsol.international";
+  let instagram = "https://instagram.com/techsol.international";
+  let linkedin = "https://linkedin.com/company/techsol-international";
+  let address = "Tinkune-32, Kathmandu, Nepal (Near Tinkune Bridge)";
+  let phone = "+977-1-4491100, +977-9851023455";
   let email = "info@techsol.international";
   let industrialCenters = "Tinkune (Kathmandu) & Mills Parkway (Biratnagar, Bhairahawa)";
 
-  if (process.env.DATABASE_URL || process.env.NODE_ENV === 'development') {
+  const now = Date.now();
+  if (serverCachedConfigs && (now - serverLastFetched < SERVER_CACHE_TTL)) {
+    facebook = serverCachedConfigs.facebook || facebook;
+    instagram = serverCachedConfigs.instagram || instagram;
+    linkedin = serverCachedConfigs.linkedin || linkedin;
+    address = serverCachedConfigs.address || address;
+    phone = serverCachedConfigs.phone || phone;
+    email = serverCachedConfigs.email || email;
+    industrialCenters = serverCachedConfigs.industrialCenters || industrialCenters;
+  } else if (process.env.DATABASE_URL || process.env.NODE_ENV === 'development') {
     try {
-      const configs = await sql`SELECT key, value FROM techsol_config`;
+      const fetchPromise = sql`SELECT key, value FROM techsol_config`;
+      const timeoutPromise = new Promise<null>((_, reject) => 
+        setTimeout(() => reject(new Error('Timeout connecting to database')), 1500)
+      );
+
+      const configs = await Promise.race([fetchPromise, timeoutPromise]);
       if (configs && Array.isArray(configs)) {
+        const mapped: Record<string, string> = {};
         configs.forEach((item: { key: string; value: string }) => {
-          if (item.key === 'social_facebook' && item.value?.trim()) facebook = item.value.trim();
-          if (item.key === 'social_instagram' && item.value?.trim()) instagram = item.value.trim();
-          if (item.key === 'social_linkedin' && item.value?.trim()) linkedin = item.value.trim();
-          if (item.key === 'contact_address' && item.value?.trim()) address = item.value.trim();
-          if (item.key === 'contact_phone' && item.value?.trim()) phone = item.value.trim();
-          if (item.key === 'contact_email' && item.value?.trim()) email = item.value.trim();
-          if (item.key === 'contact_industrial_centers' && item.value?.trim()) industrialCenters = item.value.trim();
+          if (item.key === 'social_facebook' && item.value?.trim()) facebook = mapped.facebook = item.value.trim();
+          if (item.key === 'social_instagram' && item.value?.trim()) instagram = mapped.instagram = item.value.trim();
+          if (item.key === 'social_linkedin' && item.value?.trim()) linkedin = mapped.linkedin = item.value.trim();
+          if (item.key === 'contact_address' && item.value?.trim()) address = mapped.address = item.value.trim();
+          if (item.key === 'contact_phone' && item.value?.trim()) phone = mapped.phone = item.value.trim();
+          if (item.key === 'contact_email' && item.value?.trim()) email = mapped.email = item.value.trim();
+          if (item.key === 'contact_industrial_centers' && item.value?.trim()) industrialCenters = mapped.industrialCenters = item.value.trim();
         });
+        serverCachedConfigs = mapped;
+        serverLastFetched = now;
       }
     } catch (err) {
-      console.warn("DB config fetch fallback inside layout:", err);
+      console.warn("DB config fetch fallback inside layout:", err instanceof Error ? err.message : err);
     }
   }
 
@@ -71,6 +138,9 @@ export default async function RootLayout({
 
         {/* Full-site Floating AI Support Agent */}
         <Chatbot />
+
+        {/* Scroll To Top button */}
+        <ScrollToTop />
 
         {/* Corporate Footer with Social icons, Quick links and contact details */}
         <footer className="bg-slate-950 text-slate-350 py-12 px-4 sm:px-8 border-t border-slate-900 select-text">

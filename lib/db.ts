@@ -24,6 +24,7 @@ export interface Enquiry {
   description: string;
   session_chat_history: string; // JSON string represent history
   created_at: Date;
+  status?: string; // Pending, Working, Evaluating, Closed
 }
 
 export interface CmsConfig {
@@ -106,6 +107,15 @@ export async function initDb() {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `;
+
+    // Ensure status column exists (migration)
+    try {
+      await sql`
+        ALTER TABLE techsol_enquiries ADD COLUMN IF NOT EXISTS status VARCHAR(50) DEFAULT 'Pending'
+      `;
+    } catch (err) {
+      console.warn('Enquiries status column alter warning:', err);
+    }
 
     // 2. Create Config/Settings Table
     await sql`
@@ -281,8 +291,19 @@ export async function initDb() {
       { key: 'home_industry_title_4', value: 'Snacks & Namkeen' },
       { key: 'home_industry_desc_4', value: 'Chips, extruded snacks, nuts, popcorn, and puffed products — our savoury seasoning blends deliver the bold tastes Nepali consumers love.' },
       { key: 'about_operational_framework', value: 'Techsol International provides certified food-grade, safe, and highly calibrated flavor formulations and production layouts that comply with global hygiene and manufacturing standards.' },
-      { key: 'about_chronology', value: 'Charting fifteen years of technological integration, converting domestic agro-manufacturers into regional export leaders.' },
-      { key: 'about_inspections', value: 'Every machinery setup, raw component, compressor, and sorter undergoes 72 hours of continuous-load trial testing before shipping from our Kathmandu hubs. We guarantee zero moisture leakage, anti-dust build, and exact calibration to fit your localized power grid requirements.' },
+      { key: 'about_cert_1_title', value: 'Government Grade 1' },
+      { key: 'about_cert_1_desc', value: 'Certified for handling multi-TPH heavy milling erections.' },
+      { key: 'about_cert_2_title', value: 'ISO 9001:2015 Standards' },
+      { key: 'about_cert_2_desc', value: 'All CCD cameras and air manifolds compliant with global safety.' },
+      { key: 'home_slider_image_1', value: 'https://images.unsplash.com/photo-1595273670150-bd0c3c392e46?auto=format&fit=crop&q=80&w=1200' },
+      { key: 'home_slider_image_2', value: 'https://images.unsplash.com/photo-1541888946425-d81bb19240f5?auto=format&fit=crop&q=80&w=1200' },
+      { key: 'home_slider_image_3', value: 'https://images.unsplash.com/photo-1578328819058-b69f3a3b0f6b?auto=format&fit=crop&q=80&w=1200' },
+      { key: 'home_slider_image_4', value: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=1200' },
+      { key: 'home_slider_image_5', value: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&q=80&w=1200' },
+      { key: 'home_about_section_image', value: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800' },
+      { key: 'home_about_section_heading', value: 'Your Premier Partner in Food Flavour & Production Science' },
+      { key: 'home_about_section_text', value: 'Techsol International bridges the gap between premium global ingredient science and Nepal\'s burgeoning food manufacturing industry. Operating from Koteshwor-Tinkune in Kathmandu, we supply high-grade food flavours, compound seasonings, and specialized recipe formulations to major confectionery, beverage, dairy, and snack brands across Nepal.' },
+      { key: 'home_about_section_subtext', value: 'Beyond world-class ingredients, we provide professional mechanical and plant engineering consulting. From automated optical sorting setups to turnkey flour mills and liquid packaging lines, we help local food processors optimize layouts, reduce overheads, and scale output cleanly.' },
       { key: 'trust_strip_text', value: 'Trusted by bakeries, beverage plants, confectionery units, dairy processors & more across Nepal' }
     ];
 

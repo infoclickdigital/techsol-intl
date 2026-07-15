@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Target, Award, ShieldAlert, CheckCircle2, Factory, Eye, Milestone, Loader } from 'lucide-react';
+import { Target, Eye, CheckCircle2, Loader, Star, Quote, ArrowLeft, ArrowRight } from 'lucide-react';
+import { motion } from 'motion/react';
 
 export default function AboutPage() {
   const [loading, setLoading] = useState(true);
@@ -12,38 +13,99 @@ export default function AboutPage() {
     about_mission: "To supply premium ingredients and state-of-the-art consulting services that empower Nepal's food manufacturers to create high-quality, delicious, and market-ready products with complete technical confidence.",
     about_vision: "To lead Nepal's food and beverage sector towards complete self-sufficiency and high-export potential by delivering world-class flavor science and turnkey production design solutions.",
     about_operational_framework: "Techsol International provides certified food-grade, safe, and highly calibrated flavor formulations and production layouts that comply with global hygiene and manufacturing standards.",
-    about_chronology: 'Charting fifteen years of technological integration, converting domestic agro-manufacturers into regional export leaders.',
-    about_inspections: 'Every machinery setup, raw component, compressor, and sorter undergoes 72 hours of continuous-load trial testing before shipping from our Kathmandu hubs. We guarantee zero moisture leakage, anti-dust build, and exact calibration to fit your localized power grid requirements.'
+    about_cert_1_title: 'Government Grade 1',
+    about_cert_1_desc: 'Certified for handling multi-TPH heavy milling erections.',
+    about_cert_2_title: 'ISO 9001:2015 Standards',
+    about_cert_2_desc: 'All CCD cameras and air manifolds compliant with global safety.',
+    home_industry_title_1: 'Bakery & Confectionery',
+    home_industry_desc_1: 'Breads, cakes, biscuits, cookies, pastries, chocolates, and candies — we supply flavours and functional ingredients that deliver consistent taste and texture at scale.',
+    home_industry_title_2: 'Beverages',
+    home_industry_desc_2: 'Soft drinks, juices, energy drinks, flavoured water, traditional Nepali drinks — our liquid and powder flavours ensure clean, vibrant taste profiles.',
+    home_industry_title_3: 'Dairy & Ice Cream',
+    home_industry_desc_3: 'Flavoured milk, yoghurt, paneer, butter, ice cream, and kulfi — our dairy-specific flavour range is optimized for heat stability and cold temperature performance.',
+    home_industry_title_4: 'Snacks & Namkeen',
+    home_industry_desc_4: 'Chips, extruded snacks, nuts, popcorn, and puffed products — our savoury seasoning blends deliver the bold tastes Nepali consumers love.',
   });
+  
   const [teamMembers, setTeamMembers] = useState<any[]>([]);
+  const [testimonials, setTestimonials] = useState<any[]>([]);
+  const [activeTestimonialIndex, setActiveTestimonialIndex] = useState(0);
 
   useEffect(() => {
+    const CACHE_KEY = 'techsol_home_data_cache';
+    const CACHE_TTL = 300000; // 5 minutes in ms
+
+    function hydrateAboutData(result: any) {
+      if (result.cms) {
+        const mapped = { ...cms };
+        result.cms.forEach((item: any) => {
+          if (item.key in mapped) {
+            mapped[item.key as keyof typeof cms] = item.value;
+          }
+        });
+        setCms(mapped);
+      }
+      if (result.team) {
+        setTeamMembers(result.team);
+      }
+      if (result.testimonials) {
+        setTestimonials(result.testimonials);
+      }
+    }
+
     async function loadAboutData() {
       try {
-        const [cmsRes, teamRes] = await Promise.all([
+        // 1. Check local cache first for lightning fast instant loading
+        const cached = localStorage.getItem(CACHE_KEY);
+        if (cached) {
+          const { timestamp, data } = JSON.parse(cached);
+          if (Date.now() - timestamp < CACHE_TTL) {
+            hydrateAboutData(data);
+            setLoading(false);
+            
+            // Stale-While-Revalidate background sync
+            fetch('/api/content')
+              .then(res => res.json())
+              .then(result => {
+                if (result.success) {
+                  localStorage.setItem(CACHE_KEY, JSON.stringify({ timestamp: Date.now(), data: result }));
+                }
+              })
+              .catch(() => {});
+            return;
+          }
+        }
+
+        // 2. Fetch fresh from endpoint if no cache or expired
+        const [cmsRes, teamRes, allRes] = await Promise.all([
           fetch('/api/content?scope=cms'),
-          fetch('/api/content?scope=team')
+          fetch('/api/content?scope=team'),
+          fetch('/api/content')
         ]);
         
+        let fetchedData: any = {};
         if (cmsRes.ok) {
           const cmsData = await cmsRes.json();
           if (cmsData.success && cmsData.data) {
-            const mapped = { ...cms };
-            cmsData.data.forEach((item: any) => {
-              if (item.key in mapped) {
-                mapped[item.key as keyof typeof cms] = item.value;
-              }
-            });
-            setCms(mapped);
+            fetchedData.cms = cmsData.data;
           }
         }
-
         if (teamRes.ok) {
           const teamData = await teamRes.json();
           if (teamData.success && teamData.data) {
-            setTeamMembers(teamData.data);
+            fetchedData.team = teamData.data;
           }
         }
+        if (allRes.ok) {
+          const allData = await allRes.json();
+          if (allData.success) {
+            fetchedData.testimonials = allData.testimonials;
+            // Also store back to full cache
+            localStorage.setItem(CACHE_KEY, JSON.stringify({ timestamp: Date.now(), data: allData }));
+          }
+        }
+
+        hydrateAboutData(fetchedData);
       } catch (err) {
         console.error('Error loading about pages CMS data:', err);
       } finally {
@@ -52,6 +114,14 @@ export default function AboutPage() {
     }
     loadAboutData();
   }, []);
+
+  const handlePrevTestimonial = () => {
+    setActiveTestimonialIndex((prev) => (prev === 0 ? testimonials.length - 1 : prev - 1));
+  };
+
+  const handleNextTestimonial = () => {
+    setActiveTestimonialIndex((prev) => (prev === testimonials.length - 1 ? 0 : prev + 1));
+  };
 
   return (
     <div className="flex-1 bg-slate-50 py-8 sm:py-12 md:py-16 px-4 sm:px-8">
@@ -65,7 +135,7 @@ export default function AboutPage() {
           {loading ? (
             <div className="flex items-center gap-2">
               <Loader className="h-5 w-5 animate-spin text-amber-600" />
-              <span className="text-xs font-mono text-slate-400">Fetching corporate registry...</span>
+              <span className="text-xs font-mono text-slate-450">Fetching corporate registry...</span>
             </div>
           ) : (
             <>
@@ -100,13 +170,14 @@ export default function AboutPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                 {teamMembers.length > 0 ? (
                   teamMembers.map((member) => (
-                    <div key={member.id} className="p-3 bg-slate-50 border border-slate-200 flex gap-3 items-center rounded-none group hover:border-amber-550 transition-colors">
+                    <div key={member.id} className="p-3 bg-slate-50 border border-slate-200 flex gap-3 items-center rounded-none group hover:border-amber-500 transition-colors">
                       <div className="w-12 h-12 shrink-0 bg-slate-200 overflow-hidden border border-slate-150">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img 
                           src={member.image_url || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=150'} 
                           alt={member.name}
                           className="w-full h-full object-cover opacity-100 transition-all duration-200"
+                          referrerPolicy="no-referrer"
                         />
                       </div>
                       <div className="space-y-1 font-sans">
@@ -120,7 +191,7 @@ export default function AboutPage() {
                     </div>
                   ))
                 ) : (
-                  // Fallbacks in case seed has empty rows
+                  // Fallbacks
                   <>
                     <div className="border-l-2 border-amber-600 pl-3 py-1.5 bg-slate-50 font-mono">
                       <span className="font-extrabold text-slate-950 block">Er. R. K. Shrestha</span>
@@ -151,16 +222,16 @@ export default function AboutPage() {
               <div className="flex items-start gap-3">
                 <CheckCircle2 className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
                 <div className="text-xs space-y-0.5">
-                  <span className="font-bold text-white block">Government Grade 1</span>
-                  <span className="text-slate-400">Certified for handling multi-TPH heavy milling erections.</span>
+                  <span className="font-bold text-white block">{cms.about_cert_1_title || 'Government Grade 1'}</span>
+                  <span className="text-slate-400">{cms.about_cert_1_desc || 'Certified for handling multi-TPH heavy milling erections.'}</span>
                 </div>
               </div>
 
               <div className="flex items-start gap-3">
                 <CheckCircle2 className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
                 <div className="text-xs space-y-0.5">
-                  <span className="font-bold text-white block">ISO 9001:2015 Standards</span>
-                  <span className="text-slate-400">All CCD cameras and air manifolds compliant with global safety.</span>
+                  <span className="font-bold text-white block">{cms.about_cert_2_title || 'ISO 9001:2015 Standards'}</span>
+                  <span className="text-slate-400">{cms.about_cert_2_desc || 'All CCD cameras and air manifolds compliant with global safety.'}</span>
                 </div>
               </div>
             </div>
@@ -202,62 +273,103 @@ export default function AboutPage() {
 
         </div>
 
-        {/* Dynamic Timeline Milestone Section */}
-        <div className="border-t border-slate-200 pt-16 space-y-12">
+        {/* REPLACEMENT 1: INDUSTRIES WE SERVE ACCROSS NEPAL (Bento Cards with Images) */}
+        <div className="border-t border-slate-200 pt-16 space-y-12" id="about-industries-section">
           <div className="text-center md:text-left space-y-3 max-w-xl">
             <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-amber-600 font-mono block">
-              Historical Milestones
+              Market Operations
             </span>
             <h2 className="text-2xl sm:text-3xl font-black text-slate-900 uppercase">
-              Chronology of Industrial Progress in Nepal
+              Industries We Serve Across Nepal
             </h2>
-            <p className="text-xs sm:text-sm text-slate-500 font-sans">
-              {cms.about_chronology}
+            <p className="text-xs sm:text-sm text-slate-500 font-sans leading-relaxed">
+              We supply specialized ingredients, customized powder formulations, and automated hardware setups across all key industrial corridors.
             </p>
           </div>
 
-          <div className="relative border-l border-slate-200 ml-4 pl-8 space-y-10 py-2">
+          {/* Bento card set for About page */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             
-            <div className="relative">
-              <div className="absolute -left-12 top-1 w-4 h-4 bg-amber-600 border-4 border-white"></div>
-              <div className="space-y-1.5">
-                <span className="font-mono text-xs font-black text-amber-600">2011 &ndash; FOUNDATION</span>
-                <h4 className="font-black text-slate-900 uppercase text-sm sm:text-base">Kathmandu Erection Facility Established</h4>
-                <p className="text-xs text-slate-500 max-w-2xl leading-relaxed">
-                  Techsol International is founded near Tinkune, Kathmandu, introducing the first localized technical support desk for photoelectric agricultural sorters in the country.
+            {/* Bakery Card */}
+            <div className="relative h-[280px] bg-slate-950 border border-slate-200 overflow-hidden group flex flex-col justify-end p-6">
+              <div className="absolute inset-0">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img 
+                  src="https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&q=80&w=400"
+                  alt="Bakery Industry"
+                  className="w-full h-full object-cover opacity-40 group-hover:opacity-75 transition-all duration-500 group-hover:scale-105"
+                  referrerPolicy="no-referrer"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent"></div>
+              </div>
+              <div className="relative z-10 space-y-1">
+                <span className="text-[8px] font-mono text-amber-500 font-bold block">01 / BAKERY</span>
+                <h4 className="font-extrabold text-base uppercase text-white tracking-wide">{cms.home_industry_title_1}</h4>
+                <p className="text-[10px] text-slate-300 leading-tight">
+                  Consistent textures, sweet notes, and certified emulsifiers for major biscuit and cake plants.
                 </p>
               </div>
             </div>
 
-            <div className="relative">
-              <div className="absolute -left-12 top-1 w-4 h-4 bg-slate-900 border-4 border-white"></div>
-              <div className="space-y-1.5">
-                <span className="font-mono text-xs font-black text-amber-600">2016 &ndash; MILL EXPANSION</span>
-                <h4 className="font-black text-slate-900 uppercase text-sm sm:text-base">Pioneered Integrated Rice & Wheat Plants</h4>
-                <p className="text-xs text-slate-500 max-w-2xl leading-relaxed">
-                  Began full-workflow design and civil layout commissioning of heavy 5-10 TPH mills in Biratnagar and Bhairahawa corridors to support domestic grain self-sufficiency.
+            {/* Beverage Card */}
+            <div className="relative h-[280px] bg-slate-950 border border-slate-200 overflow-hidden group flex flex-col justify-end p-6">
+              <div className="absolute inset-0">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img 
+                  src="https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&q=80&w=400"
+                  alt="Beverage Industry"
+                  className="w-full h-full object-cover opacity-40 group-hover:opacity-75 transition-all duration-500 group-hover:scale-105"
+                  referrerPolicy="no-referrer"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent"></div>
+              </div>
+              <div className="relative z-10 space-y-1">
+                <span className="text-[8px] font-mono text-amber-500 font-bold block">02 / BEVERAGE</span>
+                <h4 className="font-extrabold text-base uppercase text-white tracking-wide">{cms.home_industry_title_2}</h4>
+                <p className="text-[10px] text-slate-300 leading-tight">
+                  Premium heat-stable liquid concentrates, citric profiles, and customized cloudifying agents.
                 </p>
               </div>
             </div>
 
-            <div className="relative">
-              <div className="absolute -left-12 top-1 w-4 h-4 bg-slate-900 border-4 border-white"></div>
-              <div className="space-y-1.5">
-                <span className="font-mono text-xs font-black text-amber-600">2021 &ndash; CRYOGENIC ENGINEERING</span>
-                <h4 className="font-black text-slate-900 uppercase text-sm sm:text-base">First Cryogenic Spice Mills in Kathmandu Valley</h4>
-                <p className="text-xs text-slate-500 max-w-2xl leading-relaxed">
-                  Developed customized cooling chambers utilizing liquid nitrogen to crush cardamom (alaichi) and ginger without degrading essential volatile oils.
+            {/* Dairy Card */}
+            <div className="relative h-[280px] bg-slate-950 border border-slate-200 overflow-hidden group flex flex-col justify-end p-6">
+              <div className="absolute inset-0">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img 
+                  src="https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&q=80&w=400"
+                  alt="Dairy Industry"
+                  className="w-full h-full object-cover opacity-40 group-hover:opacity-75 transition-all duration-500 group-hover:scale-105"
+                  referrerPolicy="no-referrer"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent"></div>
+              </div>
+              <div className="relative z-10 space-y-1">
+                <span className="text-[8px] font-mono text-amber-500 font-bold block">03 / DAIRY</span>
+                <h4 className="font-extrabold text-base uppercase text-white tracking-wide">{cms.home_industry_title_3}</h4>
+                <p className="text-[10px] text-slate-300 leading-tight">
+                  High cold-temp performance flavorings, stabilizer systems, and automated packager setups.
                 </p>
               </div>
             </div>
 
-            <div className="relative">
-              <div className="absolute -left-12 top-1 w-4 h-4 bg-amber-600 border-4 border-white animate-pulse"></div>
-              <div className="space-y-1.5">
-                <span className="font-mono text-xs font-black text-amber-600">2026 &ndash; SMART AUTOMATION</span>
-                <h4 className="font-black text-slate-900 uppercase text-sm sm:text-base">Centralized PLC-SCADA Logic Integration</h4>
-                <p className="text-xs text-slate-500 max-w-2xl leading-relaxed">
-                  Present-day rollout of smart sensors, enabling factory managers to monitor machine feeds, throughputs, temperature gauges, and sorting purity values directly via centralized management screens.
+            {/* Snacks Card */}
+            <div className="relative h-[280px] bg-slate-950 border border-slate-200 overflow-hidden group flex flex-col justify-end p-6">
+              <div className="absolute inset-0">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img 
+                  src="https://images.unsplash.com/photo-1566478989037-eec170784d0b?auto=format&fit=crop&q=80&w=400"
+                  alt="Snacks Industry"
+                  className="w-full h-full object-cover opacity-40 group-hover:opacity-75 transition-all duration-500 group-hover:scale-105"
+                  referrerPolicy="no-referrer"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent"></div>
+              </div>
+              <div className="relative z-10 space-y-1">
+                <span className="text-[8px] font-mono text-amber-500 font-bold block">04 / SNACKS</span>
+                <h4 className="font-extrabold text-base uppercase text-white tracking-wide">{cms.home_industry_title_4}</h4>
+                <p className="text-[10px] text-slate-300 leading-tight">
+                  Bold seasoning salts, custom spice compound powders, and automated optical food sorting.
                 </p>
               </div>
             </div>
@@ -265,25 +377,91 @@ export default function AboutPage() {
           </div>
         </div>
 
-        {/* Corporate Certification & Values Badge */}
-        <div className="bg-slate-900 text-white p-8 sm:p-12 border border-slate-800 relative overflow-hidden">
-          <div className="relative z-10 max-w-2xl space-y-4">
-            <span className="text-[10px] font-mono font-bold text-amber-500 uppercase tracking-widest block">
-              Validation & Compliance
-            </span>
-            <h3 className="text-xl sm:text-2xl font-black uppercase text-white tracking-tight">
-              Rigorous Engineering Inspections & Testing
-            </h3>
-            <p className="text-xs text-slate-400 leading-relaxed font-sans">
-              {cms.about_inspections}
-            </p>
-            <div className="flex items-center gap-2 pt-2 text-[10px] uppercase font-mono tracking-widest text-slate-400">
-              <Milestone className="h-4 w-4 text-amber-500" />
-              <span>Certified Plant layout operator &mdash; No: 9112-AG-NEPAL</span>
+        {/* REPLACEMENT 2: TESTIMONIALS SLIDER FOR ABOUT US PAGE */}
+        {testimonials.length > 0 && (
+          <div className="border-t border-slate-200 pt-16 space-y-10" id="about-testimonials-section">
+            <div className="text-center md:text-left space-y-3 max-w-xl">
+              <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-amber-600 font-mono block">
+                Verification Appraisals
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-black text-slate-900 uppercase">
+                Endorsements from {"Nepal's"} Food Operators
+              </h2>
+            </div>
+
+            <div className="relative bg-white p-6 sm:p-10 border border-slate-200 space-y-6 flex flex-col justify-between overflow-hidden">
+              <Quote className="absolute top-6 right-6 h-12 w-12 text-slate-100 stroke-1 pointer-events-none" />
+              
+              <div className="flex gap-1 text-amber-500">
+                <Star className="h-4 w-4 fill-amber-500 text-amber-500" />
+                <Star className="h-4 w-4 fill-amber-500 text-amber-500" />
+                <Star className="h-4 w-4 fill-amber-500 text-amber-500" />
+                <Star className="h-4 w-4 fill-amber-500 text-amber-500" />
+                <Star className="h-4 w-4 fill-amber-500 text-amber-500" />
+              </div>
+
+              <motion.div 
+                key={activeTestimonialIndex}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.25 }}
+                className="space-y-4 min-h-[120px] flex flex-col justify-center"
+              >
+                <p className="text-sm sm:text-base text-slate-800 leading-relaxed font-serif font-medium italic pr-5">
+                  &ldquo;{testimonials[activeTestimonialIndex]?.quote}&rdquo;
+                </p>
+              </motion.div>
+
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-6 border-t border-slate-100">
+                <div className="flex items-center gap-3">
+                  {testimonials[activeTestimonialIndex]?.image_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img 
+                      src={testimonials[activeTestimonialIndex].image_url} 
+                      alt={testimonials[activeTestimonialIndex].name}
+                      className="w-10 h-10 object-cover grayscale border border-slate-200"
+                    />
+                  ) : (
+                    <div className="w-10 h-10 bg-slate-900 text-amber-500 font-black flex items-center justify-center text-md select-none">
+                      {testimonials[activeTestimonialIndex]?.name[0] || 'T'}
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-extrabold text-xs text-slate-900 block">
+                      {testimonials[activeTestimonialIndex]?.name}
+                    </span>
+                    <span className="text-[10px] font-mono text-slate-400 uppercase">
+                      {testimonials[activeTestimonialIndex]?.designation}, {testimonials[activeTestimonialIndex]?.company}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Navigation */}
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={handlePrevTestimonial}
+                    className="p-2 bg-slate-50 border border-slate-200 text-slate-700 hover:text-amber-600 hover:border-slate-800 transition-all cursor-pointer"
+                    aria-label="Previous appraisal"
+                    id="about-testimonial-prev"
+                  >
+                    <ArrowLeft className="h-4 w-4" />
+                  </button>
+                  <span className="text-[11px] font-mono text-slate-400 min-w-[40px] text-center select-none">
+                    {activeTestimonialIndex + 1} / {testimonials.length}
+                  </span>
+                  <button
+                    onClick={handleNextTestimonial}
+                    className="p-2 bg-slate-50 border border-slate-200 text-slate-700 hover:text-amber-600 hover:border-slate-800 transition-all cursor-pointer"
+                    aria-label="Next appraisal"
+                    id="about-testimonial-next"
+                  >
+                    <ArrowRight className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
-          <div className="absolute bottom-0 right-0 w-64 h-full bg-linear-to-l from-slate-800/10 to-transparent pointer-events-none"></div>
-        </div>
+        )}
 
       </div>
     </div>

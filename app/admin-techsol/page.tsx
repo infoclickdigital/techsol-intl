@@ -45,6 +45,7 @@ interface Lead {
   description: string;
   session_chat_history: string;
   created_at: string;
+  status?: string; // Pending, Working, Evaluating, Closed
 }
 
 interface CmsItem {
@@ -266,9 +267,25 @@ export default function AdminPage() {
             home_industry_title_4: '',
             home_industry_desc_4: '',
             about_operational_framework: '',
-            about_chronology: '',
-            about_inspections: '',
+            about_cert_1_title: '',
+            about_cert_1_desc: '',
+            about_cert_2_title: '',
+            about_cert_2_desc: '',
+            home_slider_image_1: '',
+            home_slider_image_2: '',
+            home_slider_image_3: '',
+            home_slider_image_4: '',
+            home_slider_image_5: '',
+            home_about_section_image: '',
+            home_about_section_heading: '',
+            home_about_section_text: '',
+            home_about_section_subtext: '',
             trust_strip_text: '',
+            stats_products: '',
+            stats_partners: '',
+            stats_expertise: '',
+            featured_blog_id: '',
+            home_about_section_image_text: '',
           };
           payload.cms.forEach((item: CmsItem) => {
             cmsDict[item.key] = item.value;
@@ -644,6 +661,32 @@ export default function AdminPage() {
     }
   };
 
+  const triggerSetFeaturedBlog = async (blogId: string) => {
+    setIsSaving(true);
+    try {
+      const res = await fetch('/api/content', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'save_cms',
+          token: sessionToken,
+          payload: {
+            items: [
+              { key: 'featured_blog_id', value: blogId }
+            ]
+          }
+        })
+      });
+      if (res.ok) {
+        setCmsFormMapping(prev => ({ ...prev, featured_blog_id: blogId }));
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   // --- NEW: CRUD ACTIONS FOR TESTIMONIALS ---
   const triggerUpsertTestimonial = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -711,6 +754,63 @@ export default function AdminPage() {
     } catch (err) {
       console.error(err);
     }
+  };
+
+  const handleUpdateStatus = async (id: string, status: string) => {
+    try {
+      const res = await fetch('/api/content', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update_enquiry_status',
+          token: sessionToken,
+          payload: { id, status }
+        })
+      });
+      if (res.ok) {
+        fetchCompleteDashboardData(sessionToken);
+      }
+    } catch (err) {
+      console.error('Update status error:', err);
+    }
+  };
+
+  const exportToCSV = () => {
+    if (filteredEnquiries.length === 0) {
+      alert("No data available to export.");
+      return;
+    }
+    const headers = ["ID", "Type", "Client Name", "Contact Phone", "Location/Address", "Industry Sector", "Model/Inquiry Type", "Description", "Status", "Created At"];
+    const rows = filteredEnquiries.map(enq => [
+      enq.id,
+      enq.type,
+      enq.client_name,
+      enq.client_phone || '',
+      enq.client_address || '',
+      enq.industry || '',
+      enq.inquiry_type_or_model || '',
+      enq.description || '',
+      enq.status || 'Pending',
+      new Date(enq.created_at).toLocaleString('en-US', { timeZone: 'Asia/Kathmandu' })
+    ]);
+
+    const csvContent = [
+      headers.join(","),
+      ...rows.map(r => r.map(val => {
+        const escaped = String(val).replace(/"/g, '""');
+        return `"${escaped}"`;
+      }).join(","))
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `Techsol_Inward_Enquiries_${activeEnquiryFilter}_${new Date().toISOString().slice(0, 10)}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   // Google Sign-In binders
@@ -1007,16 +1107,25 @@ export default function AdminPage() {
               ))}
             </div>
 
-            <div className="flex justify-between items-center bg-white border border-slate-200 p-4">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white border border-slate-200 p-4">
               <span className="text-[10px] uppercase font-mono text-slate-500 italic font-bold">
                 Logged records in Postgres: {filteredEnquiries.length} item(s) mapped
               </span>
-              <button
-                onClick={() => handleClearLogs(activeEnquiryFilter)}
-                className="text-[9px] font-mono font-bold bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-950 hover:text-white px-3 py-1.5 uppercase transition-all cursor-pointer font-black"
-              >
-                Erase current filtered index logs
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={exportToCSV}
+                  className="text-[9px] font-mono font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-950 hover:text-white px-3 py-1.5 uppercase transition-all cursor-pointer font-black flex items-center gap-1.5"
+                >
+                  <FileSpreadsheet className="h-3.5 w-3.5" />
+                  <span>Export CSV Sheet</span>
+                </button>
+                <button
+                  onClick={() => handleClearLogs(activeEnquiryFilter)}
+                  className="text-[9px] font-mono font-bold bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-950 hover:text-white px-3 py-1.5 uppercase transition-all cursor-pointer font-black"
+                >
+                  Erase current filtered index logs
+                </button>
+              </div>
             </div>
 
             {filteredEnquiries.length === 0 ? (
@@ -1028,7 +1137,7 @@ export default function AdminPage() {
                 {filteredEnquiries.map((enq) => (
                   <div key={enq.id} className="bg-white border border-slate-200 p-6 space-y-4 shadow-2xs">
                     
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-slate-100 pb-3">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-100 pb-3">
                       <div>
                         <span className="text-[10px] font-mono text-slate-400 block uppercase">
                           RECORD NO: {enq.id}
@@ -1037,9 +1146,32 @@ export default function AdminPage() {
                           Client: {enq.client_name}
                         </h3>
                       </div>
-                      <span className="text-[10px] font-mono text-slate-400">
-                        {new Date(enq.created_at).toLocaleString('en-US', { timeZone: 'Asia/Kathmandu' })}
-                      </span>
+                      <div className="flex flex-wrap items-center gap-4">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[9px] font-mono text-slate-400 uppercase italic">Status:</span>
+                          <select
+                            value={enq.status || 'Pending'}
+                            onChange={(e) => handleUpdateStatus(enq.id, e.target.value)}
+                            className={`text-[10px] font-mono font-black px-2 py-1 border rounded focus:outline-none cursor-pointer transition-all ${
+                              enq.status === 'Closed' 
+                                ? 'bg-slate-100 text-slate-600 border-slate-200'
+                                : enq.status === 'Evaluating'
+                                ? 'bg-indigo-50 text-indigo-700 border-indigo-200'
+                                : enq.status === 'Working'
+                                ? 'bg-blue-50 text-blue-700 border-blue-200'
+                                : 'bg-amber-50 text-amber-700 border-amber-200'
+                            }`}
+                          >
+                            <option value="Pending">Pending ⏳</option>
+                            <option value="Working">Working ⚙️</option>
+                            <option value="Evaluating">Evaluating 🔍</option>
+                            <option value="Closed">Closed ✅</option>
+                          </select>
+                        </div>
+                        <span className="text-[10px] font-mono text-slate-400">
+                          {new Date(enq.created_at).toLocaleString('en-US', { timeZone: 'Asia/Kathmandu' })}
+                        </span>
+                      </div>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 text-xs font-mono">
@@ -1168,109 +1300,152 @@ export default function AdminPage() {
                     placeholder="Trusted by bakeries, beverage plants, confectionery units, dairy processors & more..."
                   />
                 </div>
+
+                {/* HERO STATS COUNTER CONFIG */}
+                <div className="border-t border-slate-100 pt-4 space-y-4">
+                  <h4 className="text-[10px] font-mono uppercase text-amber-600 font-bold block tracking-wider">
+                    Hero Statistics Counter Badges
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="space-y-1 bg-slate-50 p-3 border border-slate-150">
+                      <label className="text-[9px] font-mono uppercase text-slate-550 font-bold block">
+                        Products Supplied (e.g. 500+)
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={cmsFormMapping['stats_products'] || ''}
+                        onChange={(e) => setCmsFormMapping({ ...cmsFormMapping, stats_products: e.target.value })}
+                        className="w-full border border-slate-200 bg-white focus:border-amber-600 outline-none px-2.5 py-2 text-xs font-sans rounded-none"
+                        placeholder="500+"
+                      />
+                    </div>
+                    <div className="space-y-1 bg-slate-50 p-3 border border-slate-150">
+                      <label className="text-[9px] font-mono uppercase text-slate-550 font-bold block">
+                        Industry Partners (e.g. 100+)
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={cmsFormMapping['stats_partners'] || ''}
+                        onChange={(e) => setCmsFormMapping({ ...cmsFormMapping, stats_partners: e.target.value })}
+                        className="w-full border border-slate-200 bg-white focus:border-amber-600 outline-none px-2.5 py-2 text-xs font-sans rounded-none"
+                        placeholder="100+"
+                      />
+                    </div>
+                    <div className="space-y-1 bg-slate-50 p-3 border border-slate-150">
+                      <label className="text-[9px] font-mono uppercase text-slate-550 font-bold block">
+                        Years of Expertise (e.g. 10+ Years)
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={cmsFormMapping['stats_expertise'] || ''}
+                        onChange={(e) => setCmsFormMapping({ ...cmsFormMapping, stats_expertise: e.target.value })}
+                        className="w-full border border-slate-200 bg-white focus:border-amber-600 outline-none px-2.5 py-2 text-xs font-sans rounded-none"
+                        placeholder="10+ Years"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* HERO SLIDER IMAGES CONFIG (Upto 5 images) */}
+                <div className="border-t border-slate-100 pt-4 space-y-4">
+                  <h4 className="text-[10px] font-mono uppercase text-amber-600 font-bold block tracking-wider">
+                    Hero Slider Background Images (Upto 5 URLs)
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                    {[1, 2, 3, 4, 5].map((num) => (
+                      <div key={num} className="space-y-1 bg-slate-50 p-3 border border-slate-150">
+                        <label className="text-[9px] font-mono uppercase text-slate-550 font-bold block">
+                          Image 0{num} URL
+                        </label>
+                        <input
+                          type="text"
+                          value={cmsFormMapping[`home_slider_image_${num}`] || ''}
+                          onChange={(e) => setCmsFormMapping({ ...cmsFormMapping, [`home_slider_image_${num}`]: e.target.value })}
+                          className="w-full border border-slate-200 bg-white focus:border-amber-600 outline-none px-2.5 py-2 text-[11px] font-mono rounded-none"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
 
-            {/* DYNAMIC SPICES & FLAVOR SHIELD DECK */}
+            {/* ABOUT TECHSOL INTERNATIONAL (HOMEPAGE SECTION) */}
             <div className="space-y-6 pt-6 border-t border-slate-100">
               <h3 className="text-xs font-bold uppercase tracking-widest text-slate-900 border-b pb-2 font-mono flex items-center gap-2">
-                <Cpu className="h-4.5 w-4.5 text-amber-600" />
-                <span>Homepage Spice & Flavor Section (Dynamic Copytexts)</span>
+                <Sliders className="h-4.5 w-4.5 text-amber-600" />
+                <span>Homepage About Techsol International Section</span>
               </h3>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-mono uppercase text-slate-400 font-bold block">
+                      Section Heading
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={cmsFormMapping['home_about_section_heading'] || ''}
+                      onChange={(e) => setCmsFormMapping({ ...cmsFormMapping, home_about_section_heading: e.target.value })}
+                      className="w-full border border-slate-200 focus:border-amber-600 outline-none px-4 py-3 text-xs sm:text-sm rounded-none"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-mono uppercase text-slate-400 font-bold block">
+                      Section Illustration Image URL
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={cmsFormMapping['home_about_section_image'] || ''}
+                      onChange={(e) => setCmsFormMapping({ ...cmsFormMapping, home_about_section_image: e.target.value })}
+                      className="w-full border border-slate-200 focus:border-amber-600 outline-none px-4 py-3 text-xs sm:text-sm rounded-none"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-mono uppercase text-slate-400 font-bold block">
+                      Section Illustration Image Text Overlay (Leave empty to hide)
+                    </label>
+                    <input
+                      type="text"
+                      value={cmsFormMapping['home_about_section_image_text'] || ''}
+                      onChange={(e) => setCmsFormMapping({ ...cmsFormMapping, home_about_section_image_text: e.target.value })}
+                      className="w-full border border-slate-200 focus:border-amber-600 outline-none px-4 py-3 text-xs sm:text-sm rounded-none"
+                      placeholder="e.g. Established 2011"
+                    />
+                  </div>
+                </div>
                 <div className="space-y-1">
-                  <label className="text-[10px] font-mono uppercase text-slate-400 block font-bold">Small Badge Text</label>
-                  <input
-                    type="text"
+                  <label className="text-[10px] font-mono uppercase text-slate-400 font-bold block">
+                    Primary Description Text
+                  </label>
+                  <textarea
+                    rows={3}
                     required
-                    value={cmsFormMapping['home_spice_tech_badge'] || ''}
-                    onChange={(e) => setCmsFormMapping({ ...cmsFormMapping, home_spice_tech_badge: e.target.value })}
-                    className="w-full border border-slate-200 focus:border-amber-500 px-4 py-2.5 text-xs rounded-none"
+                    value={cmsFormMapping['home_about_section_text'] || ''}
+                    onChange={(e) => setCmsFormMapping({ ...cmsFormMapping, home_about_section_text: e.target.value })}
+                    className="w-full border border-slate-200 focus:border-amber-600 outline-none px-4 py-3 text-xs rounded-none resize-none leading-relaxed font-sans"
                   />
                 </div>
-
-                <div className="space-y-1 sm:col-span-2">
-                  <label className="text-[10px] font-mono uppercase text-slate-400 block font-bold">Section title Heading</label>
-                  <input
-                    type="text"
+                <div className="space-y-1">
+                  <label className="text-[10px] font-mono uppercase text-slate-400 font-bold block">
+                    Secondary Sub Text / Supporting Copy
+                  </label>
+                  <textarea
+                    rows={3}
                     required
-                    value={cmsFormMapping['home_spice_tech_title'] || ''}
-                    onChange={(e) => setCmsFormMapping({ ...cmsFormMapping, home_spice_tech_title: e.target.value })}
-                    className="w-full border border-slate-200 focus:border-amber-500 px-4 py-2.5 text-xs rounded-none"
+                    value={cmsFormMapping['home_about_section_subtext'] || ''}
+                    onChange={(e) => setCmsFormMapping({ ...cmsFormMapping, home_about_section_subtext: e.target.value })}
+                    className="w-full border border-slate-200 focus:border-amber-600 outline-none px-4 py-3 text-xs rounded-none resize-none leading-relaxed font-sans"
                   />
                 </div>
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-[10px] font-mono uppercase text-slate-400 block font-bold">Comprehensive Description summary</label>
-                <textarea
-                  rows={3}
-                  required
-                  value={cmsFormMapping['home_spice_tech_description'] || ''}
-                  onChange={(e) => setCmsFormMapping({ ...cmsFormMapping, home_spice_tech_description: e.target.value })}
-                  className="w-full border border-slate-200 focus:border-amber-500 px-4 py-2.5 text-xs rounded-none resize-none leading-relaxed"
-                />
               </div>
             </div>
 
-            {/* DYNAMIC HOME ABOUT STORY DECK */}
-            <div className="space-y-6 pt-6 border-t border-slate-100">
-              <h3 className="text-xs font-bold uppercase tracking-widest text-slate-900 border-b pb-2 font-mono flex items-center gap-2">
-                <Factory className="h-4.5 w-4.5 text-amber-600" />
-                <span>Homepage Corporate Story (Dynamic About copytexts & photo)</span>
-              </h3>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="space-y-1">
-                  <label className="text-[10px] font-mono uppercase text-slate-400 block font-bold">Story Badge Copys</label>
-                  <input
-                    type="text"
-                    required
-                    value={cmsFormMapping['home_about_badge'] || ''}
-                    onChange={(e) => setCmsFormMapping({ ...cmsFormMapping, home_about_badge: e.target.value })}
-                    className="w-full border border-slate-200 focus:border-amber-500 px-4 py-2.5 text-xs rounded-none"
-                  />
-                </div>
-
-                <div className="space-y-1 sm:col-span-2">
-                  <label className="text-[10px] font-mono uppercase text-slate-400 block font-bold">Story Section Title</label>
-                  <input
-                    type="text"
-                    required
-                    value={cmsFormMapping['home_about_title'] || ''}
-                    onChange={(e) => setCmsFormMapping({ ...cmsFormMapping, home_about_title: e.target.value })}
-                    className="w-full border border-slate-200 focus:border-amber-500 px-4 py-2.5 text-xs rounded-none"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-[10px] font-mono uppercase text-slate-400 block font-bold">Detailed Story description</label>
-                <textarea
-                  rows={3}
-                  required
-                  value={cmsFormMapping['home_about_description'] || ''}
-                  onChange={(e) => setCmsFormMapping({ ...cmsFormMapping, home_about_description: e.target.value })}
-                  className="w-full border border-slate-200 focus:border-amber-500 px-4 py-2.5 text-xs rounded-none resize-none leading-relaxed"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-[10px] font-mono uppercase text-slate-400 block font-bold flex items-center gap-1">
-                  <ImageIcon className="h-3.5 w-3.5 text-amber-500" />
-                  <span>Corporate Story Banner Image URL Link</span>
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Paste direct HTTPS photographic URL link (e.g. Unsplash or Cloudinary)"
-                  value={cmsFormMapping['home_about_image_url'] || ''}
-                  onChange={(e) => setCmsFormMapping({ ...cmsFormMapping, home_about_image_url: e.target.value })}
-                  className="w-full border border-slate-200 focus:border-amber-500 px-4 py-2.5 text-xs rounded-none font-sans text-slate-700"
-                />
-              </div>
-            </div>
 
             {/* SECONDARY ABOUT US STORIES */}
             <div className="space-y-6 pt-6 border-t border-slate-100">
@@ -1480,30 +1655,58 @@ export default function AdminPage() {
                   />
                 </div>
 
-                <div className="space-y-1">
-                  <label className="text-[10px] font-mono uppercase text-slate-400 font-bold block">
-                    Chronology / Milestone intro copytext
-                  </label>
-                  <textarea
-                    rows={2}
-                    required
-                    value={cmsFormMapping['about_chronology'] || ''}
-                    onChange={(e) => setCmsFormMapping({ ...cmsFormMapping, about_chronology: e.target.value })}
-                    className="w-full border border-slate-200 focus:border-amber-600 outline-none px-4 py-3 text-xs rounded-none resize-none leading-relaxed font-sans"
-                  />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-mono uppercase text-slate-400 font-bold block">
+                      Certification 1 Title
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={cmsFormMapping['about_cert_1_title'] || ''}
+                      onChange={(e) => setCmsFormMapping({ ...cmsFormMapping, about_cert_1_title: e.target.value })}
+                      className="w-full border border-slate-200 focus:border-amber-600 outline-none px-4 py-3 text-xs sm:text-sm rounded-none font-sans"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-mono uppercase text-slate-400 font-bold block">
+                      Certification 1 Description
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={cmsFormMapping['about_cert_1_desc'] || ''}
+                      onChange={(e) => setCmsFormMapping({ ...cmsFormMapping, about_cert_1_desc: e.target.value })}
+                      className="w-full border border-slate-200 focus:border-amber-600 outline-none px-4 py-3 text-xs sm:text-sm rounded-none font-sans"
+                    />
+                  </div>
                 </div>
 
-                <div className="space-y-1">
-                  <label className="text-[10px] font-mono uppercase text-slate-400 font-bold block">
-                    Rigorous Engineering Inspections & Testing Description
-                  </label>
-                  <textarea
-                    rows={3}
-                    required
-                    value={cmsFormMapping['about_inspections'] || ''}
-                    onChange={(e) => setCmsFormMapping({ ...cmsFormMapping, about_inspections: e.target.value })}
-                    className="w-full border border-slate-200 focus:border-amber-600 outline-none px-4 py-3 text-xs rounded-none resize-none leading-relaxed font-sans"
-                  />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-mono uppercase text-slate-400 font-bold block">
+                      Certification 2 Title
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={cmsFormMapping['about_cert_2_title'] || ''}
+                      onChange={(e) => setCmsFormMapping({ ...cmsFormMapping, about_cert_2_title: e.target.value })}
+                      className="w-full border border-slate-200 focus:border-amber-600 outline-none px-4 py-3 text-xs sm:text-sm rounded-none font-sans"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-mono uppercase text-slate-400 font-bold block">
+                      Certification 2 Description
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={cmsFormMapping['about_cert_2_desc'] || ''}
+                      onChange={(e) => setCmsFormMapping({ ...cmsFormMapping, about_cert_2_desc: e.target.value })}
+                      className="w-full border border-slate-200 focus:border-amber-600 outline-none px-4 py-3 text-xs sm:text-sm rounded-none font-sans"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -2453,6 +2656,7 @@ export default function AdminPage() {
                         <th className="py-2.5 px-3">Category</th>
                         <th className="py-2.5 px-3">Article Headline Title</th>
                         <th className="py-2.5 px-3">Date</th>
+                        <th className="py-2.5 px-3 text-center">Featured Active</th>
                         <th className="py-2.5 px-4 text-right">Actions</th>
                       </tr>
                     </thead>
@@ -2470,6 +2674,18 @@ export default function AdminPage() {
                           <td className="py-2.5 px-3 text-slate-500 font-semibold">{b.category}</td>
                           <td className="py-2.5 px-3 font-extrabold text-slate-905 truncate max-w-[200px]" title={b.title}>{b.title}</td>
                           <td className="py-2.5 px-3">{b.date}</td>
+                          <td className="py-2.5 px-3 text-center">
+                            <button
+                              onClick={() => triggerSetFeaturedBlog(b.id)}
+                              className={`p-1 px-2.5 text-[9px] font-mono rounded-none border transition-colors ${
+                                cmsFormMapping['featured_blog_id'] === b.id
+                                  ? 'bg-amber-500 border-amber-600 text-slate-950 font-bold'
+                                  : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50'
+                              }`}
+                            >
+                              {cmsFormMapping['featured_blog_id'] === b.id ? '★ Featured' : '☆ Feature It'}
+                            </button>
+                          </td>
                           <td className="py-2.5 px-4 text-right space-x-1 whitespace-nowrap">
                             <button
                               onClick={() => {

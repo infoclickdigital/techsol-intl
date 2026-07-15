@@ -1,6 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import sql, { initDb } from '@/lib/db';
 
+// Module-scoped in-memory cache to prevent pounding the database on every page load
+let cachedData: any = null;
+let lastFetchedAt = 0;
+const CACHE_TTL = 86400000; // 24 hours (cache is invalidated reactively in real-time on any database write/mutation)
+
+function invalidateCache() {
+  cachedData = null;
+  lastFetchedAt = 0;
+}
+
 export async function GET(req: NextRequest) {
   try {
     // Lazy init database tables or ensure they exist
@@ -9,75 +19,76 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const scope = searchParams.get('scope') || 'all';
 
+    const now = Date.now();
+    const isCacheValid = cachedData && (now - lastFetchedAt < CACHE_TTL);
+
+    if (!isCacheValid) {
+      // Fetch everything in a single, high-performance batch trip!
+      const [cms, products, b2b_products, team, services, blogs, config, enquiries, testimonials] = await Promise.all([
+        sql`SELECT * FROM techsol_cms`,
+        sql`SELECT * FROM techsol_products ORDER BY id`,
+        sql`SELECT * FROM techsol_b2b_products ORDER BY id`,
+        sql`SELECT * FROM techsol_team ORDER BY id`,
+        sql`SELECT * FROM techsol_services ORDER BY id`,
+        sql`SELECT * FROM techsol_blogs ORDER BY id DESC`,
+        sql`SELECT * FROM techsol_config`,
+        sql`SELECT * FROM techsol_enquiries ORDER BY created_at DESC`,
+        sql`SELECT * FROM techsol_testimonials ORDER BY id`,
+      ]);
+
+      cachedData = {
+        cms,
+        products,
+        b2b_products,
+        team,
+        services,
+        blogs,
+        config,
+        enquiries,
+        testimonials,
+      };
+      lastFetchedAt = now;
+    }
+
     if (scope === 'cms') {
-      const cmsData = await sql`SELECT * FROM techsol_cms`;
-      return NextResponse.json({ success: true, data: cmsData });
+      return NextResponse.json({ success: true, data: cachedData.cms });
     }
 
     if (scope === 'products') {
-      const products = await sql`SELECT * FROM techsol_products ORDER BY id`;
-      return NextResponse.json({ success: true, data: products });
+      return NextResponse.json({ success: true, data: cachedData.products });
     }
 
     if (scope === 'services') {
-      const services = await sql`SELECT * FROM techsol_services ORDER BY id`;
-      return NextResponse.json({ success: true, data: services });
+      return NextResponse.json({ success: true, data: cachedData.services });
     }
 
     if (scope === 'blogs') {
-      const blogs = await sql`SELECT * FROM techsol_blogs ORDER BY id DESC`;
-      return NextResponse.json({ success: true, data: blogs });
+      return NextResponse.json({ success: true, data: cachedData.blogs });
     }
 
     if (scope === 'testimonials') {
-      const testimonials = await sql`SELECT * FROM techsol_testimonials ORDER BY id`;
-      return NextResponse.json({ success: true, data: testimonials });
+      return NextResponse.json({ success: true, data: cachedData.testimonials });
     }
 
     if (scope === 'config') {
-      const configs = await sql`SELECT * FROM techsol_config`;
-      return NextResponse.json({ success: true, data: configs });
+      return NextResponse.json({ success: true, data: cachedData.config });
     }
 
     if (scope === 'b2b_products') {
-      const b2b_products = await sql`SELECT * FROM techsol_b2b_products ORDER BY id`;
-      return NextResponse.json({ success: true, data: b2b_products });
+      return NextResponse.json({ success: true, data: cachedData.b2b_products });
     }
 
     if (scope === 'team') {
-      const team = await sql`SELECT * FROM techsol_team ORDER BY id`;
-      return NextResponse.json({ success: true, data: team });
+      return NextResponse.json({ success: true, data: cachedData.team });
     }
 
     if (scope === 'enquiries') {
-      const enquiries = await sql`SELECT * FROM techsol_enquiries ORDER BY created_at DESC`;
-      return NextResponse.json({ success: true, data: enquiries });
+      return NextResponse.json({ success: true, data: cachedData.enquiries });
     }
-
-    // Default: fetch everything in a single, high-performance batch trip!
-    const [cms, products, b2b_products, team, services, blogs, config, enquiries, testimonials] = await Promise.all([
-      sql`SELECT * FROM techsol_cms`,
-      sql`SELECT * FROM techsol_products ORDER BY id`,
-      sql`SELECT * FROM techsol_b2b_products ORDER BY id`,
-      sql`SELECT * FROM techsol_team ORDER BY id`,
-      sql`SELECT * FROM techsol_services ORDER BY id`,
-      sql`SELECT * FROM techsol_blogs ORDER BY id DESC`,
-      sql`SELECT * FROM techsol_config`,
-      sql`SELECT * FROM techsol_enquiries ORDER BY created_at DESC`,
-      sql`SELECT * FROM techsol_testimonials ORDER BY id`,
-    ]);
 
     return NextResponse.json({
       success: true,
-      cms,
-      products,
-      b2b_products,
-      team,
-      services,
-      blogs,
-      config,
-      enquiries,
-      testimonials,
+      ...cachedData
     });
   } catch (error: any) {
     console.error('API GET Content error:', error);
@@ -106,6 +117,9 @@ export async function POST(req: NextRequest) {
     if (!authorized) {
       return NextResponse.json({ success: false, error: 'Unauthorized credentials.' }, { status: 401 });
     }
+
+    // Invalidate the cache for any data mutations
+    invalidateCache();
 
     if (action === 'save_cms') {
       const { items } = payload; // Array of { key, value }
@@ -264,6 +278,13 @@ export async function POST(req: NextRequest) {
       const { id } = payload;
       await sql`DELETE FROM techsol_team WHERE id = ${id}`;
       return NextResponse.json({ success: true, message: 'Team member deleted successfully' });
+    }
+
+    // --- Enquiries/Logs status update operations ---
+    if (action === 'update_enquiry_status') {
+      const { id, status } = payload;
+      await sql`UPDATE techsol_enquiries SET status = ${status} WHERE id = ${id}`;
+      return NextResponse.json({ success: true, message: 'Enquiry status updated successfully' });
     }
 
     // --- Enquiries/Logs clear operations ---
