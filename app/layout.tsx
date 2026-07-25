@@ -34,12 +34,12 @@ export const metadata: Metadata = {
     "Spice Seasoning Kathmandu"
   ],
   alternates: {
-    canonical: "https://techsol.international",
+    canonical: "https://techsol.com.np",
   },
   openGraph: {
     title: "Techsol International | Industrial Food Processing Machinery & Automation",
     description: "Nepal's premium industrial partner for Smart CCD Optical Sorters, Turnkey Mills, Liquid Processing, and SCADA Automation consoles. Optimized with global ISO grade mechanics.",
-    url: "https://techsol.international",
+    url: "https://techsol.com.np",
     siteName: "Techsol International",
     images: [
       {

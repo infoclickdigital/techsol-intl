@@ -62,7 +62,7 @@ export default function Home() {
     home_about_badge: "A Complete Range",
     home_about_title: "A Complete Range of Flavours & Ingredients for Every Application",
     home_about_description: "From sweet to savoury, dairy to bakery — our product portfolio covers the full spectrum of food flavouring and functional ingredient needs for Nepal's food manufacturers.",
-    home_about_image_url: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=650',
+    home_about_image_url: 'https://res.cloudinary.com/dzi8j5wjd/image/upload/v1783880285/techsol-slider-1_sczwle.png',
     home_industry_title_1: 'Bakery & Confectionery',
     home_industry_desc_1: 'Breads, cakes, biscuits, cookies, pastries, chocolates, and candies — we supply flavours and functional ingredients that deliver consistent taste and texture at scale.',
     home_industry_title_2: 'Beverages',
@@ -72,12 +72,12 @@ export default function Home() {
     home_industry_title_4: 'Snacks & Namkeen',
     home_industry_desc_4: 'Chips, extruded snacks, nuts, popcorn, and puffed products — our savoury seasoning blends deliver the bold tastes Nepali consumers love.',
     trust_strip_text: "Trusted by bakeries, beverage plants, confectionery units, dairy processors & more across Nepal",
-    home_slider_image_1: "https://images.unsplash.com/photo-1595273670150-bd0c3c392e46?auto=format&fit=crop&q=80&w=1200",
-    home_slider_image_2: "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?auto=format&fit=crop&q=80&w=1200",
-    home_slider_image_3: "https://images.unsplash.com/photo-1578328819058-b69f3a3b0f6b?auto=format&fit=crop&q=80&w=1200",
-    home_slider_image_4: "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=1200",
-    home_slider_image_5: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&q=80&w=1200",
-    home_about_section_image: "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800",
+    home_slider_image_1: "https://res.cloudinary.com/dzi8j5wjd/image/upload/v1783880285/techsol-slider-1_sczwle.png",
+    home_slider_image_2: "https://res.cloudinary.com/dzi8j5wjd/image/upload/v1783880285/techsol-slider-2_neenae.png",
+    home_slider_image_3: "https://res.cloudinary.com/dzi8j5wjd/image/upload/v1783880284/techsol_sllider-3_pos1nv.jpg",
+    home_slider_image_4: "https://res.cloudinary.com/dzi8j5wjd/image/upload/v1783880284/techsol_sllider-3_pos1nv.jpg",
+    home_slider_image_5: "https://res.cloudinary.com/dzi8j5wjd/image/upload/v1783880284/techsol_sllider-3_pos1nv.jpg",
+    home_about_section_image: "https://res.cloudinary.com/dzi8j5wjd/image/upload/v1783880284/techsol_sllider-3_pos1nv.jpg",
     home_about_section_heading: "Your Premier Partner in Food Flavour & Production Science",
     home_about_section_text: "Techsol International bridges the gap between premium global ingredient science and Nepal's burgeoning food manufacturing industry. Operating from Koteshwor-Tinkune in Kathmandu, we supply high-grade food flavours, compound seasonings, and specialized recipe formulations to major confectionery, beverage, dairy, and snack brands across Nepal.",
     home_about_section_subtext: "Beyond world-class ingredients, we provide professional mechanical and plant engineering consulting. From automated optical sorting setups to turnkey flour mills and liquid packaging lines, we help local food processors optimize layouts, reduce overheads, and scale output cleanly.",
@@ -108,7 +108,7 @@ export default function Home() {
           home_about_badge: "A Complete Range",
           home_about_title: "A Complete Range of Flavours & Ingredients for Every Application",
           home_about_description: "From sweet to savoury, dairy to bakery — our product portfolio covers the full spectrum of food flavouring and functional ingredient needs for Nepal's food manufacturers.",
-          home_about_image_url: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=650',
+          home_about_image_url: 'https://res.cloudinary.com/dzi8j5wjd/image/upload/v1783880285/techsol-slider-1_sczwle.png',
           home_industry_title_1: 'Bakery & Confectionery',
           home_industry_desc_1: 'Breads, cakes, biscuits, cookies, pastries, chocolates, and candies — we supply flavours and functional ingredients that deliver consistent taste and texture at scale.',
           home_industry_title_2: 'Beverages',
@@ -118,12 +118,12 @@ export default function Home() {
           home_industry_title_4: 'Snacks & Namkeen',
           home_industry_desc_4: 'Chips, extruded snacks, nuts, popcorn, and puffed products — our savoury seasoning blends deliver the bold tastes Nepali consumers love.',
           trust_strip_text: "Trusted by bakeries, beverage plants, confectionery units, dairy processors & more across Nepal",
-          home_slider_image_1: "https://images.unsplash.com/photo-1595273670150-bd0c3c392e46?auto=format&fit=crop&q=80&w=1200",
-          home_slider_image_2: "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?auto=format&fit=crop&q=80&w=1200",
-          home_slider_image_3: "https://images.unsplash.com/photo-1578328819058-b69f3a3b0f6b?auto=format&fit=crop&q=80&w=1200",
-          home_slider_image_4: "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=1200",
-          home_slider_image_5: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&q=80&w=1200",
-          home_about_section_image: "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800",
+          home_slider_image_1: "https://res.cloudinary.com/dzi8j5wjd/image/upload/v1783880285/techsol-slider-1_sczwle.png",
+          home_slider_image_2: "https://res.cloudinary.com/dzi8j5wjd/image/upload/v1783880285/techsol-slider-2_neenae.png",
+          home_slider_image_3: "https://res.cloudinary.com/dzi8j5wjd/image/upload/v1783880284/techsol_sllider-3_pos1nv.jpg",
+          home_slider_image_4: "https://res.cloudinary.com/dzi8j5wjd/image/upload/v1783880284/techsol_sllider-3_pos1nv.jpg",
+          home_slider_image_5: "https://res.cloudinary.com/dzi8j5wjd/image/upload/v1783880284/techsol_sllider-3_pos1nv.jpg",
+          home_about_section_image: "https://res.cloudinary.com/dzi8j5wjd/image/upload/v1783880284/techsol_sllider-3_pos1nv.jpg",
           home_about_section_heading: "Your Premier Partner in Food Flavour & Production Science",
           home_about_section_text: "Techsol International bridges the gap between premium global ingredient science and Nepal's burgeoning food manufacturing industry. Operating from Koteshwor-Tinkune in Kathmandu, we supply high-grade food flavours, compound seasonings, and specialized recipe formulations to major confectionery, beverage, dairy, and snack brands across Nepal.",
           home_about_section_subtext: "Beyond world-class ingredients, we provide professional mechanical and plant engineering consulting. From automated optical sorting setups to turnkey flour mills and liquid packaging lines, we help local food processors optimize layouts, reduce overheads, and scale output cleanly.",
@@ -325,7 +325,7 @@ export default function Home() {
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img 
-              src={cms.home_about_section_image || "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800"}
+              src={cms.home_about_section_image || "https://res.cloudinary.com/dzi8j5wjd/image/upload/v1783880284/techsol_sllider-3_pos1nv.jpg"}
               alt="Techsol Spices Food Quality Testing Lab" 
               className="w-full h-full object-cover brightness-95 group-hover:scale-105 transition-all duration-500"
               referrerPolicy="no-referrer"
@@ -401,7 +401,7 @@ export default function Home() {
               <div className="absolute inset-0">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img 
-                  src="https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&q=80&w=600"
+                  src="https://res.cloudinary.com/dzi8j5wjd/image/upload/v1783880285/techsol-slider-1_sczwle.png"
                   alt="Bakery Industry Nepal"
                   className="w-full h-full object-cover opacity-35 group-hover:opacity-60 transition-all duration-500 group-hover:scale-105"
                   referrerPolicy="no-referrer"
@@ -427,7 +427,7 @@ export default function Home() {
               <div className="absolute inset-0">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img 
-                  src="https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&q=80&w=600"
+                  src="https://res.cloudinary.com/dzi8j5wjd/image/upload/v1783880285/techsol-slider-2_neenae.png"
                   alt="Beverage Industry Nepal"
                   className="w-full h-full object-cover opacity-35 group-hover:opacity-60 transition-all duration-500 group-hover:scale-105"
                   referrerPolicy="no-referrer"
@@ -453,7 +453,7 @@ export default function Home() {
               <div className="absolute inset-0">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img 
-                  src="https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&q=80&w=600"
+                  src="https://res.cloudinary.com/dzi8j5wjd/image/upload/v1783880284/techsol_sllider-3_pos1nv.jpg"
                   alt="Dairy Industry Nepal"
                   className="w-full h-full object-cover opacity-35 group-hover:opacity-60 transition-all duration-500 group-hover:scale-105"
                   referrerPolicy="no-referrer"
@@ -479,7 +479,7 @@ export default function Home() {
               <div className="absolute inset-0">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img 
-                  src="https://images.unsplash.com/photo-1566478989037-eec170784d0b?auto=format&fit=crop&q=80&w=600"
+                  src="https://res.cloudinary.com/dzi8j5wjd/image/upload/v1783880285/techsol-slider-4_vqjvqf.png"
                   alt="Snacks Industry Nepal"
                   className="w-full h-full object-cover opacity-35 group-hover:opacity-60 transition-all duration-500 group-hover:scale-105"
                   referrerPolicy="no-referrer"
