@@ -1,15 +1,22 @@
 import { GoogleGenAI } from "@google/genai";
 import { NextRequest, NextResponse } from "next/server";
 
-// Standard client initialization with the "aistudio-build" User-Agent for telemetry
-const ai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY,
-  httpOptions: {
-    headers: {
-      'User-Agent': 'aistudio-build',
-    }
+let aiClient: GoogleGenAI | null = null;
+function getAIClient(): GoogleGenAI | null {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) return null;
+  if (!aiClient) {
+    aiClient = new GoogleGenAI({
+      apiKey,
+      httpOptions: {
+        headers: {
+          'User-Agent': 'aistudio-build',
+        },
+      },
+    });
   }
-});
+  return aiClient;
+}
 
 const TECHSOL_CONTEXT = `
 You are the expert B2B virtual assistant of Techsol International, Nepal's trusted partner for Food Flavours & Industry Solutions.
@@ -74,12 +81,19 @@ export async function POST(req: NextRequest) {
     }
 
     // Fallback directly to Gemini if Groq is not configured or errors out
-    const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
-      contents: `${TECHSOL_CONTEXT}\n\nUser Question: ${prompt}\nAnswer:`,
-    });
+    const genAI = getAIClient();
+    if (genAI) {
+      const response = await genAI.models.generateContent({
+        model: "gemini-3.5-flash",
+        contents: `${TECHSOL_CONTEXT}\n\nUser Question: ${prompt}\nAnswer:`,
+      });
 
-    return NextResponse.json({ text: response.text || "I'm here to assist you with Techsol's premium food flavours, functional ingredients, and machinery consulting. How can we support your production line today?" });
+      if (response.text) {
+        return NextResponse.json({ text: response.text });
+      }
+    }
+
+    return NextResponse.json({ text: "I'm here to assist you with Techsol's premium food flavours, functional ingredients, and machinery consulting. How can we support your production line today?" });
   } catch (error: any) {
     console.error("Gemini Chat Route Error:", error);
     return NextResponse.json(

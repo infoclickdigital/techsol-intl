@@ -1,14 +1,30 @@
 import postgres from 'postgres';
 
-const connectionString = process.env.DATABASE_URL || 'postgresql://neondb_owner:npg_U9CmPoRTBnL3@ep-sparkling-dust-aoh8g1za.c-2.ap-southeast-1.aws.neon.tech/neondb?sslmode=require';
+const connectionString =
+  process.env.DATABASE_URL ||
+  process.env.POSTGRES_URL ||
+  process.env.POSTGRES_PRISMA_URL ||
+  process.env.DATABASE_URL_UNPOOLED ||
+  'postgresql://neondb_owner:npg_U9CmPoRTBnL3@ep-sparkling-dust-aoh8g1za.c-2.ap-southeast-1.aws.neon.tech/neondb?sslmode=require';
 
-// Initialize the SQL client. We use the connectionString directly.
-const sql = postgres(connectionString, {
-  ssl: 'require',
-  max: 10,
-  idle_timeout: 20,
-  connect_timeout: 10,
-});
+// Neon & Vercel serverless database client singleton
+declare global {
+  // eslint-disable-next-line no-var
+  var _techsolSql: ReturnType<typeof postgres> | undefined;
+}
+
+// Initialize the SQL client. We use the connectionString directly with pooled configuration.
+const sql =
+  globalThis._techsolSql ??
+  postgres(connectionString, {
+    ssl: 'require',
+    max: 10,
+    idle_timeout: 20,
+    connect_timeout: 15,
+    prepare: false, // Recommended for Neon PgBouncer / serverless pooled connections
+  });
+
+globalThis._techsolSql = sql;
 
 export default sql;
 
@@ -89,10 +105,18 @@ export interface DBTeamMember {
   image_url: string;
 }
 
+// In-memory execution cache for serverless lifecycle
+let initDbPromise: Promise<void> | null = null;
+
 // Function to initialize tables and seed them with initial content if empty
-export async function initDb() {
-  try {
-    // 1. Create Enquiries Table
+export async function initDb(): Promise<void> {
+  if (initDbPromise) {
+    return initDbPromise;
+  }
+
+  initDbPromise = (async () => {
+    try {
+      // 1. Create Enquiries Table
     await sql`
       CREATE TABLE IF NOT EXISTS techsol_enquiries (
         id VARCHAR(100) PRIMARY KEY,
@@ -435,7 +459,11 @@ export async function initDb() {
     }
 
     console.log('Neon Database Tables initialized and seeded successfully.');
-  } catch (err) {
-    console.error('Core Database Table Initialization / Seed error:', err);
-  }
+    } catch (err) {
+      initDbPromise = null;
+      console.error('Core Database Table Initialization / Seed error:', err);
+    }
+  })();
+
+  return initDbPromise;
 }

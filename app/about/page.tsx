@@ -37,13 +37,15 @@ export default function AboutPage() {
 
     function hydrateAboutData(result: any) {
       if (result.cms) {
-        const mapped = { ...cms };
-        result.cms.forEach((item: any) => {
-          if (item.key in mapped) {
-            mapped[item.key as keyof typeof cms] = item.value;
-          }
+        setCms((prev) => {
+          const mapped = { ...prev };
+          result.cms.forEach((item: any) => {
+            if (item.key in mapped) {
+              mapped[item.key as keyof typeof prev] = item.value;
+            }
+          });
+          return mapped;
         });
-        setCms(mapped);
       }
       if (result.team) {
         setTeamMembers(result.team);

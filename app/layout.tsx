@@ -97,7 +97,7 @@ export default async function RootLayout({
     phone = serverCachedConfigs.phone || phone;
     email = serverCachedConfigs.email || email;
     industrialCenters = serverCachedConfigs.industrialCenters || industrialCenters;
-  } else if (process.env.DATABASE_URL || process.env.NODE_ENV === 'development') {
+  } else if (process.env.DATABASE_URL || process.env.POSTGRES_URL || process.env.POSTGRES_PRISMA_URL || process.env.NODE_ENV === 'development') {
     try {
       const fetchPromise = sql`SELECT key, value FROM techsol_config`;
       const timeoutPromise = new Promise<null>((_, reject) => 
