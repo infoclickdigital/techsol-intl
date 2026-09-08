@@ -118,7 +118,7 @@ export default function AdminPage() {
   
   // System presets mapped from Postgres
   const [spreadsheetId, setSpreadsheetId] = useState('');
-  const [recipientEmails, setRecipientEmails] = useState('contact@techsol.com.np');
+  const [recipientEmails, setRecipientEmails] = useState('info@techsol.international');
   const [socialFacebook, setSocialFacebook] = useState('');
   const [socialInstagram, setSocialInstagram] = useState('');
   const [socialLinkedin, setSocialLinkedin] = useState('');
@@ -2966,7 +2966,7 @@ export default function AdminPage() {
                       required
                       value={recipientEmails}
                       onChange={(e) => setRecipientEmails(e.target.value)}
-                      placeholder="e.g. contact@techsol.com.np, hq@techsol.international"
+                      placeholder="e.g. info@techsol.international, hq@techsol.international"
                       className="w-full border border-slate-200 focus:border-amber-600 px-4 py-3 text-xs rounded-none outline-none font-mono"
                     />
                     <span className="text-[9px] text-slate-400 font-mono block">Instantly notify designated mill engineering leads upon customer quote applications.</span>
@@ -3017,7 +3017,7 @@ export default function AdminPage() {
                           required
                           value={contactEmail}
                           onChange={(e) => setContactEmail(e.target.value)}
-                          placeholder="e.g. contact@techsol.com.np"
+                          placeholder="e.g. info@techsol.international"
                           className="w-full border border-slate-200 focus:border-amber-600 px-4 py-3 text-xs rounded-none outline-none font-mono"
                         />
                       </div>

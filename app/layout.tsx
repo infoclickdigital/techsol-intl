@@ -34,12 +34,12 @@ export const metadata: Metadata = {
     "Spice Seasoning Kathmandu"
   ],
   alternates: {
-    canonical: "https://techsol.com.np",
+    canonical: "https://techsol.international",
   },
   openGraph: {
     title: "Techsol International | Industrial Food Processing Machinery & Automation",
     description: "Nepal's premium industrial partner for Smart CCD Optical Sorters, Turnkey Mills, Liquid Processing, and SCADA Automation consoles. Optimized with global ISO grade mechanics.",
-    url: "https://techsol.com.np",
+    url: "https://techsol.international",
     siteName: "Techsol International",
     images: [
       {
@@ -85,7 +85,7 @@ export default async function RootLayout({
   let linkedin = "https://linkedin.com/company/techsol-international";
   let address = "Tinkune-32, Kathmandu, Nepal (Near Tinkune Bridge)";
   let phone = "+977-1-4491100, +977-9851023455";
-  let email = "contact@techsol.com.np";
+  let email = "info@techsol.international";
   let industrialCenters = "Tinkune (Kathmandu) & Mills Parkway (Biratnagar, Bhairahawa)";
 
   const now = Date.now();

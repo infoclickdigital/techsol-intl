@@ -11,9 +11,11 @@ interface HeroSliderProps {
 }
 
 const DEFAULT_IMAGES = [
-  'https://res.cloudinary.com/dzi8j5wjd/image/upload/v1783880285/techsol-slider-1_sczwle.png', // Grain silos/towers
-  'https://res.cloudinary.com/dzi8j5wjd/image/upload/v1783880285/techsol-slider-2_neenae.png', // Engineering plant and grain silos
-  'https://res.cloudinary.com/dzi8j5wjd/image/upload/v1783880284/techsol_sllider-3_pos1nv.jpg', // Large steel storage silos
+  'https://images.unsplash.com/photo-1595273670150-bd0c3c392e46?auto=format&fit=crop&q=80&w=1200', // Grain silos/towers
+  'https://images.unsplash.com/photo-1541888946425-d81bb19240f5?auto=format&fit=crop&q=80&w=1200', // Engineering plant and grain silos
+  'https://images.unsplash.com/photo-1578328819058-b69f3a3b0f6b?auto=format&fit=crop&q=80&w=1200', // Large steel storage silos
+  'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=1200', // Food ingredients spices
+  'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&q=80&w=1200', // Automated food machinery plant
 ];
 
 export default function HeroSlider({ 

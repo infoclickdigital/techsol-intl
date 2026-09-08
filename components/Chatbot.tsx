@@ -192,7 +192,7 @@ export default function Chatbot() {
       }
     } catch (err) {
       console.error(err);
-      setMessages(prev => [...prev, { role: 'assistant', text: 'A network interruption occurred. Please reach our engineers at contact@techsol.com.np.' }]);
+      setMessages(prev => [...prev, { role: 'assistant', text: 'A network interruption occurred. Please reach our engineers at info@techsol.international.' }]);
     } finally {
       setLoading(false);
     }

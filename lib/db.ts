@@ -224,7 +224,7 @@ export async function initDb() {
       await sql`
         INSERT INTO techsol_config (key, value) VALUES 
         ('spreadsheet_id', ''),
-        ('recipient_emails', 'contact@techsol.com.np'),
+        ('recipient_emails', 'info@techsol.international'),
         ('cloudinary_cloud_name', 'techsol-international'),
         ('cloudinary_api_key', ''),
         ('cloudinary_api_secret', ''),
@@ -233,7 +233,7 @@ export async function initDb() {
         ('social_linkedin', 'https://linkedin.com/company/techsol-international'),
         ('contact_address', 'Tinkune-32, Kathmandu, Nepal (Near Tinkune Bridge)'),
         ('contact_phone', '+977-1-4491100, +977-9851023450'),
-        ('contact_email', 'contact@techsol.com.np'),
+        ('contact_email', 'info@techsol.international'),
         ('contact_industrial_centers', 'Tinkune (Kathmandu) & Mills Parkway (Biratnagar, Bhairahawa)')
       `;
     } else {
@@ -244,7 +244,7 @@ export async function initDb() {
         { k: 'social_linkedin', v: 'https://linkedin.com/company/techsol-international' },
         { k: 'contact_address', v: 'Tinkune-32, Kathmandu, Nepal (Near Tinkune Bridge)' },
         { k: 'contact_phone', v: '+977-1-4491100, +977-9851023455' },
-        { k: 'contact_email', v: 'contact@techsol.com.np' },
+        { k: 'contact_email', v: 'info@techsol.international' },
         { k: 'contact_industrial_centers', v: 'Tinkune (Kathmandu) & Mills Parkway (Biratnagar, Bhairahawa)' }
       ];
       for (const item of keysToEnsure) {

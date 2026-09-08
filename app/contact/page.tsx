@@ -18,7 +18,7 @@ export default function ContactPage() {
   const [recipientEmail, setRecipientEmail] = useState<string>('');
   const [contactAddress, setContactAddress] = useState<string>('Ward 14, Tinkune Corridor, Kathmandu, Nepal');
   const [contactPhone, setContactPhone] = useState<string>('+977-1-5110291, +977-9851088461');
-  const [contactEmail, setContactEmail] = useState<string>('contact@techsol.com.np');
+  const [contactEmail, setContactEmail] = useState<string>('info@techsol.international');
   const [googleMapsEmbedUrl, setGoogleMapsEmbedUrl] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
@@ -86,7 +86,7 @@ export default function ContactPage() {
           ...formData,
           spreadsheetId: syncSpreadsheetId,
           accessToken: activeToken,
-          recipientEmail: recipientEmail || 'contact@techsol.com.np',
+          recipientEmail: recipientEmail || 'info@techsol.international',
         }),
       });
 
@@ -182,7 +182,7 @@ export default function ContactPage() {
                 <AlertCircle className="h-5 w-5 text-rose-600 shrink-0" />
                 <div className="space-y-1">
                   <span className="font-extrabold block uppercase tracking-wider">Submission Error</span>
-                  <span>We were unable to route this lead inquiry. Please check the network connectivity or write to contact@techsol.com.np.</span>
+                  <span>We were unable to route this lead inquiry. Please check the network connectivity or write to info@techsol.international.</span>
                 </div>
               </div>
             )}
