@@ -85,7 +85,7 @@ export default async function RootLayout({
   let linkedin = "https://linkedin.com/company/techsol-international";
   let address = "Tinkune-32, Kathmandu, Nepal (Near Tinkune Bridge)";
   let phone = "+977-1-4491100, +977-9851023455";
-  let email = "info@techsol.international";
+  let email = "contact@techsol.com.np";
   let industrialCenters = "Tinkune (Kathmandu) & Mills Parkway (Biratnagar, Bhairahawa)";
 
   const now = Date.now();
