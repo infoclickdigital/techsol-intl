@@ -33,7 +33,7 @@ Guidelines for Answers:
 - Keep answers warm, expert, informative, and very short (strictly 1 to 2 sentences, maximum 3 sentences).
 - Never write verbose explanations or lengthy paragraphs. Get straight to the relevant point.
 - Always assume the user represents a Nepalese food or beverage processor (artisan bakery, beverage plant, snack brand, dairy processor, or noodle factory).
-- Mention our Tinkune, Kathmandu head office, our industrial centers, or suggest they submit a sample request or enquiry through our Contact form, or email info@techsolinternational.com.
+- Mention our Biratnagar headquarters, industrial centers (Biratnagar, Birgunj, Kathmandu), or suggest they submit a sample request or enquiry through our Contact form, phone 9851218867, or email contact@techsol.com.np.
 `;
 
 export async function POST(req: NextRequest) {

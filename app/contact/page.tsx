@@ -16,9 +16,9 @@ export default function ContactPage() {
   const [hasGoogleToken, setHasGoogleToken] = useState<boolean>(false);
   const [syncSpreadsheetId, setSyncSpreadsheetId] = useState<string>('');
   const [recipientEmail, setRecipientEmail] = useState<string>('');
-  const [contactAddress, setContactAddress] = useState<string>('Ward 14, Tinkune Corridor, Kathmandu, Nepal');
-  const [contactPhone, setContactPhone] = useState<string>('+977-1-5110291, +977-9851088461');
-  const [contactEmail, setContactEmail] = useState<string>('info@techsol.international');
+  const [contactAddress, setContactAddress] = useState<string>('Biratnagar-5, Morang');
+  const [contactPhone, setContactPhone] = useState<string>('9851218867');
+  const [contactEmail, setContactEmail] = useState<string>('contact@techsol.com.np');
   const [googleMapsEmbedUrl, setGoogleMapsEmbedUrl] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');

@@ -7,6 +7,7 @@ import Logo from "@/components/Logo";
 import Chatbot from "@/components/Chatbot";
 import Header from "@/components/Header";
 import ScrollToTop from "@/components/ScrollToTop";
+import FooterHeadquarters from "@/components/FooterHeadquarters";
 import { Facebook, Instagram, Linkedin, Phone, Mail, MapPin, Building, Globe, Shield } from "lucide-react";
 import sql from "@/lib/db";
 
@@ -21,6 +22,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://techsol.international"),
   title: "Techsol International | Industrial Food Processing Machinery & Automation",
   description: "Nepal's premium industrial partner for Smart CCD Optical Sorters, Turnkey Mills, Liquid Processing, and SCADA Automation consoles. Optimized with global ISO grade mechanics.",
   keywords: [
@@ -70,6 +72,8 @@ export const metadata: Metadata = {
   },
 };
 
+export const revalidate = 60;
+
 // Server-side in-memory cache for layout configurations to maximize performance
 let serverCachedConfigs: Record<string, string> | null = null;
 let serverLastFetched = 0;
@@ -83,10 +87,10 @@ export default async function RootLayout({
   let facebook = "https://facebook.com/techsol.international";
   let instagram = "https://instagram.com/techsol.international";
   let linkedin = "https://linkedin.com/company/techsol-international";
-  let address = "Tinkune-32, Kathmandu, Nepal (Near Tinkune Bridge)";
-  let phone = "+977-1-4491100, +977-9851023455";
-  let email = "info@techsol.international";
-  let industrialCenters = "Tinkune (Kathmandu) & Mills Parkway (Biratnagar, Bhairahawa)";
+  let address = "Biratnagar-5, Morang";
+  let phone = "9851218867";
+  let email = "contact@techsol.com.np";
+  let industrialCenters = "Biratnagar, Birjung and Kathmandu";
 
   const now = Date.now();
   if (serverCachedConfigs && (now - serverLastFetched < SERVER_CACHE_TTL)) {
@@ -101,7 +105,7 @@ export default async function RootLayout({
     try {
       const fetchPromise = sql`SELECT key, value FROM techsol_config`;
       const timeoutPromise = new Promise<null>((_, reject) => 
-        setTimeout(() => reject(new Error('Timeout connecting to database')), 1500)
+        setTimeout(() => reject(new Error('Timeout connecting to database')), 4000)
       );
 
       const configs = await Promise.race([fetchPromise, timeoutPromise]);
@@ -196,7 +200,7 @@ export default async function RootLayout({
               <ul className="space-y-2 text-xs text-slate-400">
                 <li>
                   <Link href="/" className="hover:text-amber-500 hover:underline transition-all block">
-                    &raquo; Home Portal
+                    &raquo; Home
                   </Link>
                 </li>
                 <li>
@@ -227,32 +231,13 @@ export default async function RootLayout({
               </ul>
             </div>
 
-            {/* Contacts Col (5 Cols) */}
-            <div className="md:col-span-5 space-y-4 font-sans text-xs">
-              <h4 className="text-xs font-bold uppercase tracking-wider font-mono text-amber-500">
-                Corporate Headquarters
-              </h4>
-              <div className="space-y-3 font-normal text-slate-400 leading-relaxed">
-                <div className="flex items-start gap-2.5">
-                  <MapPin className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
-                  <span>{address}</span>
-                </div>
-                <div className="flex items-start gap-2.5">
-                  <Phone className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
-                  <span>Direct Desk: {phone}</span>
-                </div>
-                <div className="flex items-start gap-2.5">
-                  <Mail className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
-                  <span>
-                    Primary Desk: <a href={`mailto:${email}`} className="hover:text-amber-500 hover:underline">{email}</a>
-                  </span>
-                </div>
-                <div className="flex items-start gap-2.5">
-                  <Building className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
-                  <span>Industrial Centers: {industrialCenters}</span>
-                </div>
-              </div>
-            </div>
+            {/* Contacts Col (5 Cols) with Server + Client Live Auto-Sync */}
+            <FooterHeadquarters 
+              initialAddress={address}
+              initialPhone={phone}
+              initialEmail={email}
+              initialIndustrialCenters={industrialCenters}
+            />
 
           </div>
 
