@@ -374,7 +374,7 @@ export default function Home() {
       </section>
 
       {/* 4. INDUSTRIES THAT WE SERVE ACROSS NEPAL (Redesigned Beautifully with Bento Image Cards) */}
-      <section className="bg-slate-900 text-white py-16 px-4 sm:px-8 border-b border-slate-950" id="homepage-industries-section">
+       <section className="bg-slate-900 text-white py-16 px-4 sm:px-8 border-b border-slate-950" id="homepage-industries-section">
         <div className="max-w-7xl mx-auto space-y-12">
           
           <div className="space-y-3 text-center md:text-left max-w-xl">
@@ -401,7 +401,7 @@ export default function Home() {
               <div className="absolute inset-0">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img 
-                  src="https://res.cloudinary.com/dzi8j5wjd/image/upload/v1783880284/techsol_sllider-3_pos1nv.jpg"
+                  src="https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&q=80&w=600"
                   alt="Bakery Industry Nepal"
                   className="w-full h-full object-cover opacity-35 group-hover:opacity-60 transition-all duration-500 group-hover:scale-105"
                   referrerPolicy="no-referrer"
@@ -427,7 +427,7 @@ export default function Home() {
               <div className="absolute inset-0">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img 
-                  src="https://res.cloudinary.com/dzi8j5wjd/image/upload/v1783880284/techsol_sllider-3_pos1nv.jpg"
+                  src="https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&q=80&w=600"
                   alt="Beverage Industry Nepal"
                   className="w-full h-full object-cover opacity-35 group-hover:opacity-60 transition-all duration-500 group-hover:scale-105"
                   referrerPolicy="no-referrer"
@@ -453,7 +453,7 @@ export default function Home() {
               <div className="absolute inset-0">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img 
-                  src="https://res.cloudinary.com/dzi8j5wjd/image/upload/v1783880284/techsol_sllider-3_pos1nv.jpg"
+                  src="https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&q=80&w=600"
                   alt="Dairy Industry Nepal"
                   className="w-full h-full object-cover opacity-35 group-hover:opacity-60 transition-all duration-500 group-hover:scale-105"
                   referrerPolicy="no-referrer"
@@ -479,7 +479,7 @@ export default function Home() {
               <div className="absolute inset-0">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img 
-                  src="https://res.cloudinary.com/dzi8j5wjd/image/upload/v1783880284/techsol_sllider-3_pos1nv.jpg"
+                  src="https://images.unsplash.com/photo-1566478989037-eec170784d0b?auto=format&fit=crop&q=80&w=600"
                   alt="Snacks Industry Nepal"
                   className="w-full h-full object-cover opacity-35 group-hover:opacity-60 transition-all duration-500 group-hover:scale-105"
                   referrerPolicy="no-referrer"
