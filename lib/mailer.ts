@@ -312,13 +312,28 @@ Next Steps:
     const fsData = await fsRes.json().catch(() => ({}));
     logs.push(`FormSubmit response: ${JSON.stringify(fsData)}`);
 
-    return {
-      success: true,
-      method: 'FormSubmit Gateway',
-      message: `Enquiry routed to ${recipientEmail} via Gateway. (${fsData.message || 'Dispatched'})`,
-      recipient: recipientEmail,
-      logs,
-    };
+    const isOk = fsRes.ok && (fsData.success === 'true' || fsData.success === true || !('success' in fsData));
+
+    if (isOk) {
+      return {
+        success: true,
+        method: 'FormSubmit Gateway',
+        message: `Enquiry routed to ${recipientEmail} via Gateway. (${fsData.message || 'Delivered successfully'})`,
+        recipient: recipientEmail,
+        logs,
+      };
+    } else {
+      logs.push(`FormSubmit returned non-success: ${fsData.message || 'Check recipient inbox for activation link'}`);
+      return {
+        success: false,
+        method: 'FormSubmit Gateway',
+        message: fsData.message?.includes('Activation') 
+          ? `FormSubmit activation required: Check ${recipientEmail} inbox to click 'Activate Form'.`
+          : (fsData.message || 'Gateway dispatch rejected.'),
+        recipient: recipientEmail,
+        logs,
+      };
+    }
   } catch (fsErr: any) {
     logs.push(`FormSubmit Gateway error: ${fsErr.message}`);
   }
