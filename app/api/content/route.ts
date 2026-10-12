@@ -1,15 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import sql, { initDb } from '@/lib/db';
+import { getCachedData, setCachedData, isCacheValid, invalidateCache } from '@/lib/cache';
 
-// Module-scoped in-memory cache to prevent pounding the database on every page load
-let cachedData: any = null;
-let lastFetchedAt = 0;
-const CACHE_TTL = 86400000; // 24 hours (cache is invalidated reactively in real-time on any database write/mutation)
-
-function invalidateCache() {
-  cachedData = null;
-  lastFetchedAt = 0;
-}
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export async function GET(req: NextRequest) {
   try {
@@ -18,13 +12,24 @@ export async function GET(req: NextRequest) {
 
     const { searchParams } = new URL(req.url);
     const scope = searchParams.get('scope') || 'all';
+    const isFresh = searchParams.get('fresh') === 'true';
 
-    const now = Date.now();
-    const isCacheValid = cachedData && (now - lastFetchedAt < CACHE_TTL);
+    // Inward client enquiries are live transactional records - ALWAYS query Neon DB live!
+    if (scope === 'enquiries') {
+      const liveEnquiries = await sql`SELECT * FROM techsol_enquiries ORDER BY created_at DESC`;
+      return NextResponse.json({ success: true, data: liveEnquiries }, {
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        }
+      });
+    }
 
-    if (!isCacheValid) {
+    const cacheHit = !isFresh && isCacheValid();
+    let currentData = getCachedData();
+
+    if (!cacheHit || !currentData) {
       // Fetch everything in a single, high-performance batch trip!
-      const [cms, products, b2b_products, team, services, blogs, config, enquiries, testimonials] = await Promise.all([
+      const [cms, products, b2b_products, team, services, blogs, config, testimonials] = await Promise.all([
         sql`SELECT * FROM techsol_cms`,
         sql`SELECT * FROM techsol_products ORDER BY id`,
         sql`SELECT * FROM techsol_b2b_products ORDER BY id`,
@@ -32,11 +37,10 @@ export async function GET(req: NextRequest) {
         sql`SELECT * FROM techsol_services ORDER BY id`,
         sql`SELECT * FROM techsol_blogs ORDER BY id DESC`,
         sql`SELECT * FROM techsol_config`,
-        sql`SELECT * FROM techsol_enquiries ORDER BY created_at DESC`,
         sql`SELECT * FROM techsol_testimonials ORDER BY id`,
       ]);
 
-      cachedData = {
+      currentData = {
         cms,
         products,
         b2b_products,
@@ -44,51 +48,60 @@ export async function GET(req: NextRequest) {
         services,
         blogs,
         config,
-        enquiries,
         testimonials,
       };
-      lastFetchedAt = now;
+      setCachedData(currentData);
     }
 
+    // Always fetch latest live enquiries for full payload
+    const liveEnquiries = await sql`SELECT * FROM techsol_enquiries ORDER BY created_at DESC`;
+
     if (scope === 'cms') {
-      return NextResponse.json({ success: true, data: cachedData.cms });
+      return NextResponse.json({ success: true, data: currentData.cms });
     }
 
     if (scope === 'products') {
-      return NextResponse.json({ success: true, data: cachedData.products });
+      return NextResponse.json({ success: true, data: currentData.products });
     }
 
     if (scope === 'services') {
-      return NextResponse.json({ success: true, data: cachedData.services });
+      return NextResponse.json({ success: true, data: currentData.services });
     }
 
     if (scope === 'blogs') {
-      return NextResponse.json({ success: true, data: cachedData.blogs });
+      return NextResponse.json({ success: true, data: currentData.blogs });
     }
 
     if (scope === 'testimonials') {
-      return NextResponse.json({ success: true, data: cachedData.testimonials });
+      return NextResponse.json({ success: true, data: currentData.testimonials });
     }
 
     if (scope === 'config') {
-      return NextResponse.json({ success: true, data: cachedData.config });
+      return NextResponse.json({ success: true, data: currentData.config });
     }
 
     if (scope === 'b2b_products') {
-      return NextResponse.json({ success: true, data: cachedData.b2b_products });
+      return NextResponse.json({ success: true, data: currentData.b2b_products });
     }
 
     if (scope === 'team') {
-      return NextResponse.json({ success: true, data: cachedData.team });
+      return NextResponse.json({ success: true, data: currentData.team });
     }
 
     if (scope === 'enquiries') {
-      return NextResponse.json({ success: true, data: cachedData.enquiries });
+      return NextResponse.json({ success: true, data: liveEnquiries }, {
+        headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate' }
+      });
     }
 
     return NextResponse.json({
       success: true,
-      ...cachedData
+      ...currentData,
+      enquiries: liveEnquiries
+    }, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate'
+      }
     });
   } catch (error: any) {
     console.error('API GET Content error:', error);

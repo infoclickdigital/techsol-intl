@@ -51,6 +51,10 @@ export default function RequestQuoteModal({ isOpen, onClose, itemName, itemType 
         console.warn('Failed to prefetch admin config:', e);
       }
 
+      if (!recipientEmail) {
+        recipientEmail = 'contact@techsol.com.np';
+      }
+
       // Check if user has oauth state
       if (typeof window !== 'undefined') {
         accessToken = localStorage.getItem('google_oauth_token') || '';

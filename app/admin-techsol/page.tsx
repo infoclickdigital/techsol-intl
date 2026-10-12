@@ -39,6 +39,7 @@ interface Lead {
   type: 'product' | 'contact' | 'chat';
   client_name: string;
   client_phone: string;
+  client_email?: string;
   client_address: string;
   industry: string;
   inquiry_type_or_model: string;
@@ -46,6 +47,7 @@ interface Lead {
   session_chat_history: string;
   created_at: string;
   status?: string; // Pending, Working, Evaluating, Closed
+  email_status?: string;
 }
 
 interface CmsItem {
@@ -132,8 +134,8 @@ export default function AdminPage() {
   // Options: 'enquiries', 'cms_pages', 'cms_products', 'cms_b2b_products', 'cms_team', 'cms_services', 'cms_blogs', 'testimonials', 'settings'
   const [activeSidebarTab, setActiveSidebarTab] = useState<'enquiries' | 'cms_pages' | 'cms_products' | 'cms_b2b_products' | 'cms_team' | 'cms_services' | 'cms_blogs' | 'testimonials' | 'settings'>('enquiries');
   
-  // Enquiry Category Filters
-  const [activeEnquiryFilter, setActiveEnquiryFilter] = useState<'product' | 'contact' | 'chat'>('product');
+  // Enquiry Category Filters - defaults to 'all' so all logged records are immediately visible
+  const [activeEnquiryFilter, setActiveEnquiryFilter] = useState<'all' | 'contact' | 'product' | 'chat'>('all');
 
   // Loaders & feedback
   const [isLoading, setIsLoading] = useState(true);
@@ -613,6 +615,14 @@ export default function AdminPage() {
     e.preventDefault();
     setIsSaving(true);
     try {
+      // Clean slug: lowercase, replace spaces/slashes with dashes, remove symbols
+      const cleanBlogId = (blogForm.id || blogForm.title)
+        .trim()
+        .toLowerCase()
+        .replace(/copy url slug/gi, '')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+
       const res = await fetch('/api/content', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -620,7 +630,7 @@ export default function AdminPage() {
           action: 'upsert_blog',
           token: sessionToken,
           payload: {
-            id: blogForm.id.trim(),
+            id: cleanBlogId,
             title: blogForm.title.trim(),
             excerpt: blogForm.excerpt.trim(),
             content: blogForm.content.trim(),
@@ -831,7 +841,9 @@ export default function AdminPage() {
   };
 
   // Filtering inward logs
-  const filteredEnquiries = enquiries.filter(enq => enq.type === activeEnquiryFilter);
+  const filteredEnquiries = activeEnquiryFilter === 'all' 
+    ? enquiries 
+    : enquiries.filter(enq => enq.type === activeEnquiryFilter);
 
   // --- LOGIN SECURITY SHIELD GATE ---
   if (!isAuthenticated) {
@@ -1087,22 +1099,30 @@ export default function AdminPage() {
         {activeSidebarTab === 'enquiries' && (
           <div className="space-y-6 animate-fade-in">
             
-            <div className="flex border-b border-slate-200 pb-px">
+            <div className="flex flex-wrap border-b border-slate-200 pb-px gap-1">
               {[
-                { filter: 'product', label: 'Technical Quotations' },
-                { filter: 'contact', label: 'Contact us Form Logs' },
-                { filter: 'chat', label: 'AI Support Chat Transcripts' }
+                { filter: 'all', label: 'All Inward Enquiries', count: enquiries.length },
+                { filter: 'contact', label: 'Contact us Form Logs', count: enquiries.filter(e => e.type === 'contact').length },
+                { filter: 'product', label: 'Technical Quotations', count: enquiries.filter(e => e.type === 'product').length },
+                { filter: 'chat', label: 'AI Support Chat Transcripts', count: enquiries.filter(e => e.type === 'chat').length }
               ].map((t) => (
                 <button
                   key={t.filter}
                   onClick={() => setActiveEnquiryFilter(t.filter as any)}
-                  className={`px-5 py-3 text-xs uppercase font-extrabold tracking-wider transition-all border-b-2 cursor-pointer ${
+                  className={`px-4 sm:px-5 py-3 text-xs uppercase font-extrabold tracking-wider transition-all border-b-2 cursor-pointer flex items-center gap-2 ${
                     activeEnquiryFilter === t.filter 
-                      ? 'border-amber-600 text-slate-950 font-black bg-slate-100/50'
-                      : 'border-transparent text-slate-400 hover:text-slate-855 hover:text-slate-800'
+                      ? 'border-amber-600 text-slate-950 font-black bg-slate-100/60'
+                      : 'border-transparent text-slate-500 hover:text-slate-800'
                   }`}
                 >
-                  {t.label}
+                  <span>{t.label}</span>
+                  <span className={`px-2 py-0.5 text-[10px] font-mono font-bold rounded-full ${
+                    activeEnquiryFilter === t.filter
+                      ? 'bg-amber-600 text-white'
+                      : 'bg-slate-200 text-slate-700'
+                  }`}>
+                    {t.count}
+                  </span>
                 </button>
               ))}
             </div>
@@ -1120,7 +1140,7 @@ export default function AdminPage() {
                   <span>Export CSV Sheet</span>
                 </button>
                 <button
-                  onClick={() => handleClearLogs(activeEnquiryFilter)}
+                  onClick={() => handleClearLogs(activeEnquiryFilter === 'all' ? undefined : activeEnquiryFilter)}
                   className="text-[9px] font-mono font-bold bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-950 hover:text-white px-3 py-1.5 uppercase transition-all cursor-pointer font-black"
                 >
                   Erase current filtered index logs
@@ -2512,14 +2532,32 @@ export default function AdminPage() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <label className="text-[10px] font-mono uppercase text-slate-400 block font-bold">Post ID Slug key *</label>
+                    <div className="flex items-center justify-between">
+                      <label className="text-[10px] font-mono uppercase text-slate-400 block font-bold">Post ID Slug key *</label>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const generated = (blogForm.title || '')
+                            .toLowerCase()
+                            .replace(/[^a-z0-9]+/g, '-')
+                            .replace(/^-+|-+$/g, '');
+                          if (generated) setBlogForm({ ...blogForm, id: generated });
+                        }}
+                        className="text-[9px] font-mono text-amber-600 hover:text-slate-900 underline cursor-pointer"
+                      >
+                        Auto-generate from title
+                      </button>
+                    </div>
                     <input
                       type="text"
                       required
                       placeholder="e.g. dynamic-roller-spiced"
                       disabled={!!editingId}
                       value={blogForm.id}
-                      onChange={(e) => setBlogForm({ ...blogForm, id: e.target.value })}
+                      onChange={(e) => {
+                        const cleaned = e.target.value.toLowerCase().replace(/\s+/g, '-');
+                        setBlogForm({ ...blogForm, id: cleaned });
+                      }}
                       className="w-full border border-slate-200 px-4 py-2.5 text-xs rounded-none font-mono"
                     />
                   </div>

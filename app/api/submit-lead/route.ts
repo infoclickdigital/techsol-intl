@@ -1,11 +1,17 @@
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 import { NextRequest, NextResponse } from 'next/server';
 import sql, { initDb } from '@/lib/db';
+import { sendLeadAlert } from '@/lib/mailer';
+import { invalidateCache } from '@/lib/cache';
 
 interface LeadRecord {
   id: string;
   type: 'product' | 'contact' | 'chat';
   client_name: string;
   client_phone: string;
+  client_email?: string;
   client_address: string;
   industry: string;
   inquiry_type_or_model: string;
@@ -53,6 +59,8 @@ export async function POST(req: NextRequest) {
       type = 'contact', 
       name, 
       phone, 
+      email,
+      client_email,
       address, 
       industry, 
       machineInquiry, 
@@ -69,35 +77,77 @@ export async function POST(req: NextRequest) {
 
     const leadId = `enq_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
     const formattedDate = new Date();
+    const clientEmail = (email || client_email || '').trim();
 
-    // Statically save to Neon PostgreSQL database!
+    // 1. Statically save to Neon PostgreSQL database!
     await sql`
       INSERT INTO techsol_enquiries (
         id, 
         type, 
         client_name, 
         client_phone, 
+        client_email,
         client_address, 
         industry, 
         inquiry_type_or_model, 
         description, 
         session_chat_history,
+        email_status,
         created_at
       ) VALUES (
         ${leadId},
         ${type},
         ${name.trim()},
         ${phone ? phone.trim() : ''},
+        ${clientEmail},
         ${address ? address.trim() : ''},
         ${industry || 'Other'},
         ${machineInquiry || 'General Inquiry'},
         ${description || ''},
         ${chatHistory ? JSON.stringify(chatHistory) : ''},
+        'Dispatching to contact@techsol.com.np',
         ${formattedDate}
       )
     `;
 
-    // 1. Google Sheets sync via REST API
+    // Immediately bust in-memory CMS content cache so admin sees new enquiry without delay
+    try {
+      invalidateCache();
+    } catch (invErr) {
+      console.warn('Cache invalidation notice:', invErr);
+    }
+
+    // 2. Dispatch Email directly to contact@techsol.com.np (Multi-Tier: SMTP -> Resend -> Gateway -> Gmail API)
+    const mailResult = await sendLeadAlert({
+      id: leadId,
+      type,
+      client_name: name.trim(),
+      client_phone: phone ? phone.trim() : '',
+      client_email: clientEmail,
+      client_address: address ? address.trim() : '',
+      industry: industry || 'Other',
+      inquiry_type_or_model: machineInquiry || 'General Inquiry',
+      description: description || '',
+      created_at: formattedDate.toLocaleString('en-US', { timeZone: 'Asia/Kathmandu' }),
+      accessToken: accessToken || null,
+    });
+
+    // Record the email dispatch status in PostgreSQL
+    const emailStatusText = mailResult.success 
+      ? `Sent (${mailResult.method}) to ${mailResult.recipient}`
+      : `Delivery pending: ${mailResult.message}`;
+
+    try {
+      await sql`
+        UPDATE techsol_enquiries 
+        SET email_status = ${emailStatusText}
+        WHERE id = ${leadId}
+      `;
+    } catch (statusErr) {
+      console.warn('Failed to update enquiry email_status:', statusErr);
+    }
+
+    // 3. Optional Google Sheets sync via REST API (if user connected sheets)
     let isSynced = false;
     if (spreadsheetId && accessToken) {
       try {
@@ -122,29 +172,12 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // 2. Gmail SMTP alerting via REST API
-    if (recipientEmail && accessToken) {
-      try {
-        await sendGmailNotification(recipientEmail, accessToken, {
-          client_name: name,
-          client_phone: phone || '',
-          client_address: address || '',
-          industry: industry || 'Other',
-          inquiry_type_or_model: machineInquiry || 'General Detail',
-          description: description || '',
-          type,
-          created_at: formattedDate.toLocaleString('en-US', { timeZone: 'Asia/Kathmandu' })
-        });
-      } catch (gmailError) {
-        console.error('Error sending alert via Gmail API:', gmailError);
-      }
-    }
-
     return NextResponse.json({
       success: true,
-      message: 'Enquiry logs saved successfully',
+      message: 'Enquiry logs saved and dispatched successfully to contact@techsol.com.np',
       id: leadId,
-      synced: isSynced
+      synced: isSynced,
+      mailResult
     });
 
   } catch (error: any) {

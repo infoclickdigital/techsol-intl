@@ -50,22 +50,41 @@ export default function SingleBlogPage() {
   useEffect(() => {
     async function loadArticle() {
       try {
-        const id = params.id as string;
+        const rawId = (params?.id as string) || '';
+        // Decode URI component (e.g., handles %20, spaces, etc.) and trim
+        const decodedId = decodeURIComponent(rawId).trim().toLowerCase();
+        // Also normalize slug (strips non-alphanumeric, extra whitespace)
+        const cleanSlug = decodedId.replace(/\s+/g, '-').replace(/[^\w-]/g, '');
+
         const res = await fetch('/api/content?scope=blogs');
         if (res.ok) {
           const result = await res.json();
           if (result.success && result.data && result.data.length > 0) {
-            const found = result.data.find((b: any) => b.id === id);
+            // Flexible match: exact id, trimmed id, decoded id, clean slug, or id starting with slug
+            const found = result.data.find((b: any) => {
+              if (!b?.id) return false;
+              const bId = String(b.id).trim().toLowerCase();
+              const bSlug = bId.replace(/\s+/g, '-').replace(/[^\w-]/g, '');
+              return (
+                bId === decodedId ||
+                bId === rawId ||
+                bSlug === cleanSlug ||
+                bId.startsWith(cleanSlug) ||
+                cleanSlug.startsWith(bSlug) ||
+                (b.title && b.title.toLowerCase().includes(decodedId))
+              );
+            });
+
             if (found) {
               setArticle({
                 id: found.id,
-                category: found.category,
+                category: found.category || 'Industrial Insights',
                 title: found.title,
-                excerpt: found.excerpt,
-                content: found.content || found.excerpt, // Fallback to excerpt
-                date: found.date,
-                author: found.author,
-                read_time: found.read_time,
+                excerpt: found.excerpt || '',
+                content: found.content || found.excerpt || '',
+                date: found.date || '',
+                author: found.author || 'Techsol Editor',
+                read_time: found.read_time || '5 min read',
                 image_url: found.image_url,
               });
               return;
@@ -74,7 +93,11 @@ export default function SingleBlogPage() {
         }
         
         // Match static fallback
-        const staticMatch = STATIC_ARTICLES.find(a => a.id === id);
+        const staticMatch = STATIC_ARTICLES.find(a => {
+          const aId = a.id.toLowerCase();
+          return aId === decodedId || aId === rawId || cleanSlug.includes(aId) || aId.includes(cleanSlug);
+        });
+
         if (staticMatch) {
           setArticle(staticMatch);
         } else {
@@ -90,7 +113,7 @@ export default function SingleBlogPage() {
             read_time: '8 min read',
             image_url: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=600'
           };
-          if (id === extraDef.id) {
+          if (decodedId === extraDef.id || cleanSlug.includes(extraDef.id)) {
             setArticle(extraDef);
           }
         }
@@ -117,14 +140,15 @@ export default function SingleBlogPage() {
       <div className="flex-1 bg-slate-50 flex flex-col items-center justify-center min-h-[400px] text-center p-6 space-y-4">
         <AlertTriangle className="h-10 w-10 text-amber-600" />
         <h2 className="text-lg font-black text-slate-900 uppercase">Research Report Not Found</h2>
-        <Link href="/blogs" className="bg-slate-900 text-white text-[10px] font-mono tracking-widest uppercase px-5 py-3 font-bold">
+        <p className="text-xs text-slate-500 max-w-sm">The requested publication might have been updated or moved. Please explore our active index.</p>
+        <Link href="/blogs" className="bg-slate-900 hover:bg-amber-600 text-white text-[10px] font-mono tracking-widest uppercase px-5 py-3 font-bold transition-colors">
           Return to Blogs
         </Link>
       </div>
     );
   }
 
-  // Format content body to support double carriage linebreaks
+  // Format content body to support rich markdown headings (##, ###), lists, and formatting
   const paragraphs = article.content.split('\n');
 
   return (
@@ -183,19 +207,47 @@ export default function SingleBlogPage() {
           )}
 
           {/* Article Main Text body */}
-          <div className="font-sans text-sm sm:text-base text-slate-700 leading-relaxed space-y-4 pr-1">
-            {paragraphs.map((para, pIdx) => {
-              if (para.trim().startsWith('###')) {
-                const headingText = para.replace('###', '').trim();
+          <div className="font-sans text-sm sm:text-base text-slate-800 leading-relaxed space-y-4 pr-1">
+            {paragraphs.map((rawPara, pIdx) => {
+              const para = rawPara.trim();
+              if (!para) return null;
+
+              if (para.startsWith('### ')) {
                 return (
-                  <h3 key={pIdx} className="font-mono text-xs sm:text-sm font-bold uppercase tracking-widest text-slate-900 pt-4 pb-1">
-                    {headingText}
+                  <h3 key={pIdx} className="font-mono text-sm sm:text-base font-bold uppercase tracking-wider text-slate-900 pt-5 pb-1 border-b border-slate-100">
+                    {para.replace('### ', '')}
                   </h3>
                 );
               }
-              if (!para.trim()) return null;
+
+              if (para.startsWith('## ')) {
+                return (
+                  <h2 key={pIdx} className="text-lg sm:text-xl font-black text-slate-950 pt-7 pb-2 border-b border-slate-200">
+                    {para.replace('## ', '')}
+                  </h2>
+                );
+              }
+
+              if (para.startsWith('# ')) {
+                return (
+                  <h2 key={pIdx} className="text-xl sm:text-2xl font-black text-slate-950 pt-8 pb-2">
+                    {para.replace('# ', '')}
+                  </h2>
+                );
+              }
+
+              if (para.startsWith('- ') || para.startsWith('* ')) {
+                const itemText = para.replace(/^[-*]\s+/, '');
+                return (
+                  <div key={pIdx} className="flex items-start gap-2.5 pl-3 py-0.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-600 shrink-0 mt-2"></span>
+                    <span className="text-slate-700 leading-relaxed">{itemText}</span>
+                  </div>
+                );
+              }
+
               return (
-                <p key={pIdx}>
+                <p key={pIdx} className="leading-relaxed text-slate-700">
                   {para}
                 </p>
               );

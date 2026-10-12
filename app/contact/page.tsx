@@ -7,6 +7,7 @@ export default function ContactPage() {
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
+    email: '',
     address: '',
     industry: '',
     machineInquiry: '',
@@ -86,7 +87,7 @@ export default function ContactPage() {
           ...formData,
           spreadsheetId: syncSpreadsheetId,
           accessToken: activeToken,
-          recipientEmail: recipientEmail || 'info@techsol.international',
+          recipientEmail: recipientEmail || 'contact@techsol.com.np',
         }),
       });
 
@@ -95,6 +96,7 @@ export default function ContactPage() {
         setFormData({
           name: '',
           phone: '',
+          email: '',
           address: '',
           industry: '',
           machineInquiry: '',
@@ -168,11 +170,22 @@ export default function ContactPage() {
             </h3>
 
             {submitStatus === 'success' && (
-              <div id="contact-success-msg" className="bg-emerald-50 border border-emerald-200 text-emerald-800 p-4 mb-6 rounded-none flex items-start gap-3 font-mono text-xs">
-                <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0" />
-                <div className="space-y-1">
-                  <span className="font-extrabold block uppercase tracking-wider">Lead Submitted Successfully!</span>
-                  <span>Your lead details are synced with our representative team and saved in Techsol PostgreSQL database. A dedicated layout engineer will connect with you.</span>
+              <div id="contact-success-msg" className="bg-emerald-50 border border-emerald-200 text-emerald-900 p-4 sm:p-5 mb-6 rounded-none flex items-start gap-3 font-mono text-xs shadow-xs">
+                <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0 mt-0.5" />
+                <div className="space-y-1.5">
+                  <span className="font-extrabold block uppercase tracking-wider text-sm text-emerald-900">Enquiry Submitted & Routed!</span>
+                  <p className="text-emerald-800 font-sans text-xs leading-relaxed">
+                    Your enquiry details have been dispatched directly to <strong className="font-mono text-slate-900 font-bold">contact@techsol.com.np</strong> and saved to the Techsol database. Our engineering team will contact you shortly.
+                  </p>
+                  <div className="pt-1 flex flex-wrap gap-2">
+                    <a
+                      href="mailto:contact@techsol.com.np?subject=Techsol%20Client%20Enquiry%20Follow-up"
+                      className="inline-flex items-center gap-1 text-[11px] font-mono font-bold text-amber-800 bg-amber-100 hover:bg-amber-200 px-2.5 py-1 border border-amber-300 transition-colors"
+                    >
+                      <Mail className="h-3 w-3" />
+                      <span>Email contact@techsol.com.np directly</span>
+                    </a>
+                  </div>
                 </div>
               </div>
             )}
@@ -181,8 +194,8 @@ export default function ContactPage() {
               <div id="contact-error-msg" className="bg-rose-50 border border-rose-200 text-rose-800 p-4 mb-6 rounded-none flex items-start gap-3 font-mono text-xs">
                 <AlertCircle className="h-5 w-5 text-rose-600 shrink-0" />
                 <div className="space-y-1">
-                  <span className="font-extrabold block uppercase tracking-wider">Submission Error</span>
-                  <span>We were unable to route this lead inquiry. Please check the network connectivity or write to info@techsol.international.</span>
+                  <span className="font-extrabold block uppercase tracking-wider">Submission Notice</span>
+                  <span>We were unable to route this lead inquiry. Please check your network connection or write directly to <strong className="font-mono">contact@techsol.com.np</strong>.</span>
                 </div>
               </div>
             )}
@@ -224,21 +237,38 @@ export default function ContactPage() {
                 </div>
               </div>
 
-              {/* Row 2: Address and Site Location */}
-              <div className="space-y-1.5">
-                <label htmlFor="contact-address" className="text-xs font-semibold text-slate-700 block">
-                  Site or Office Address *
-                </label>
-                <input
-                  id="contact-address"
-                  name="address"
-                  type="text"
-                  required
-                  value={formData.address}
-                  onChange={handleChange}
-                  placeholder="e.g. Biratnagar or Kathmandu, Nepal"
-                  className="w-full border border-slate-200 focus:border-amber-600 focus:bg-white bg-slate-50 transition-colors px-4 min-h-[44px] leading-tight placeholder-slate-400 text-sm text-slate-900 rounded-lg outline-none"
-                />
+              {/* Row 2: Address and Email */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label htmlFor="contact-address" className="text-xs font-semibold text-slate-700 block">
+                    Site or Office Address *
+                  </label>
+                  <input
+                    id="contact-address"
+                    name="address"
+                    type="text"
+                    required
+                    value={formData.address}
+                    onChange={handleChange}
+                    placeholder="e.g. Biratnagar or Kathmandu, Nepal"
+                    className="w-full border border-slate-200 focus:border-amber-600 focus:bg-white bg-slate-50 transition-colors px-4 min-h-[44px] leading-tight placeholder-slate-400 text-sm text-slate-900 rounded-lg outline-none"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label htmlFor="contact-email" className="text-xs font-semibold text-slate-700 block">
+                    Email Address <span className="text-slate-400 font-normal">(Optional)</span>
+                  </label>
+                  <input
+                    id="contact-email"
+                    name="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    placeholder="e.g. office@company.com.np"
+                    className="w-full border border-slate-200 focus:border-amber-600 focus:bg-white bg-slate-50 transition-colors px-4 min-h-[44px] leading-tight placeholder-slate-400 text-sm text-slate-900 rounded-lg outline-none"
+                  />
+                </div>
               </div>
 
               {/* Row 3: Industry & Machine Class */}

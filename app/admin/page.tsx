@@ -30,7 +30,9 @@ import {
   ChevronRight,
   Database,
   Quote,
-  Users
+  Users,
+  Send,
+  Phone
 } from 'lucide-react';
 import { googleSignIn, googleSignOut, subscribeToAuth, UserProfile } from '@/lib/firebase-client';
 
@@ -39,12 +41,15 @@ interface Lead {
   type: 'product' | 'contact' | 'chat';
   client_name: string;
   client_phone: string;
+  client_email?: string;
   client_address: string;
   industry: string;
   inquiry_type_or_model: string;
   description: string;
   session_chat_history: string;
   created_at: string;
+  status?: string;
+  email_status?: string;
 }
 
 interface CmsItem {
@@ -117,14 +122,23 @@ export default function AdminPage() {
   
   // System presets mapped from Postgres
   const [spreadsheetId, setSpreadsheetId] = useState('');
-  const [recipientEmails, setRecipientEmails] = useState('info@techsol.international');
+  const [recipientEmails, setRecipientEmails] = useState('contact@techsol.com.np');
+  const [smtpHost, setSmtpHost] = useState('');
+  const [smtpPort, setSmtpPort] = useState('587');
+  const [smtpUser, setSmtpUser] = useState('');
+  const [smtpPass, setSmtpPass] = useState('');
+  const [smtpFrom, setSmtpFrom] = useState('Techsol International <contact@techsol.com.np>');
+  const [resendApiKey, setResendApiKey] = useState('');
 
   // Sidebar TABS
   // Options: 'enquiries', 'cms_pages', 'cms_products', 'cms_b2b_products', 'cms_team', 'cms_services', 'cms_blogs', 'testimonials', 'settings'
   const [activeSidebarTab, setActiveSidebarTab] = useState<'enquiries' | 'cms_pages' | 'cms_products' | 'cms_b2b_products' | 'cms_team' | 'cms_services' | 'cms_blogs' | 'testimonials' | 'settings'>('enquiries');
   
-  // Enquiry Category Filters
-  const [activeEnquiryFilter, setActiveEnquiryFilter] = useState<'product' | 'contact' | 'chat'>('product');
+  // Enquiry Category Filters - defaults to 'all' so all logged enquiries are immediately visible!
+  const [activeEnquiryFilter, setActiveEnquiryFilter] = useState<'all' | 'contact' | 'product' | 'chat'>('all');
+  const [sendingTestEmail, setSendingTestEmail] = useState(false);
+  const [testEmailResult, setTestEmailResult] = useState<string | null>(null);
+  const [resendingId, setResendingId] = useState<string | null>(null);
 
   // Loaders & feedback
   const [isLoading, setIsLoading] = useState(true);
@@ -258,7 +272,13 @@ export default function AdminPage() {
           // Prepare configurations
           payload.config.forEach((item: CmsItem) => {
             if (item.key === 'spreadsheet_id') setSpreadsheetId(item.value);
-            if (item.key === 'recipient_emails') setRecipientEmails(item.value);
+            if (item.key === 'recipient_emails') setRecipientEmails(item.value || 'contact@techsol.com.np');
+            if (item.key === 'smtp_host') setSmtpHost(item.value || '');
+            if (item.key === 'smtp_port') setSmtpPort(item.value || '587');
+            if (item.key === 'smtp_user') setSmtpUser(item.value || '');
+            if (item.key === 'smtp_pass') setSmtpPass(item.value || '');
+            if (item.key === 'smtp_from') setSmtpFrom(item.value || 'Techsol International <contact@techsol.com.np>');
+            if (item.key === 'resend_api_key') setResendApiKey(item.value || '');
           });
         }
       }
@@ -266,6 +286,49 @@ export default function AdminPage() {
       console.error('Error fetching admin dashboard content state:', err);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const fetchLiveEnquiries = async () => {
+    setIsRefreshing(true);
+    try {
+      const res = await fetch(`/api/content?scope=enquiries&fresh=true&t=${Date.now()}`, { cache: 'no-store' });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success) {
+          setEnquiries(data.data || []);
+        }
+      }
+    } catch (err) {
+      console.error('Error fetching live enquiries:', err);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
+  const handleSendTestEmail = async (enquiryId?: string) => {
+    if (enquiryId) setResendingId(enquiryId);
+    else setSendingTestEmail(true);
+    setTestEmailResult(null);
+
+    try {
+      const res = await fetch('/api/send-test-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ enquiryId, customRecipient: recipientEmails }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setTestEmailResult(`Success: Email alert dispatched via ${data.result?.method} to ${data.result?.recipient}.`);
+        await fetchLiveEnquiries();
+      } else {
+        setTestEmailResult(`Notice: ${data.error || data.result?.message || 'Email routing logged in database.'}`);
+      }
+    } catch (err: any) {
+      setTestEmailResult(`Error: ${err.message}`);
+    } finally {
+      setSendingTestEmail(false);
+      setResendingId(null);
     }
   };
 
@@ -319,6 +382,12 @@ export default function AdminPage() {
       const settingsItems = [
         { key: 'spreadsheet_id', value: spreadsheetId.trim() },
         { key: 'recipient_emails', value: recipientEmails.trim() },
+        { key: 'smtp_host', value: smtpHost.trim() },
+        { key: 'smtp_port', value: smtpPort.trim() },
+        { key: 'smtp_user', value: smtpUser.trim() },
+        { key: 'smtp_pass', value: smtpPass.trim() },
+        { key: 'smtp_from', value: smtpFrom.trim() },
+        { key: 'resend_api_key', value: resendApiKey.trim() },
       ];
 
       const res = await fetch('/api/content', {
@@ -333,13 +402,14 @@ export default function AdminPage() {
 
       if (res.ok) {
         setSaveStatus('success');
-        setStatusMessage('Central system integrations config saved directly to Postgres!');
+        setStatusMessage('Central system integrations and SMTP configs saved directly to Postgres!');
       } else {
         setSaveStatus('error');
         setStatusMessage('Request declined.');
       }
     } catch (err: any) {
       setSaveStatus('error');
+      setStatusMessage(err.message || 'Failed to save configuration.');
     } finally {
       setIsSaving(false);
     }
@@ -560,6 +630,14 @@ export default function AdminPage() {
     e.preventDefault();
     setIsSaving(true);
     try {
+      // Clean slug: lowercase, replace spaces/slashes with dashes, remove symbols
+      const cleanBlogId = (blogForm.id || blogForm.title)
+        .trim()
+        .toLowerCase()
+        .replace(/copy url slug/gi, '')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+
       const res = await fetch('/api/content', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -567,7 +645,7 @@ export default function AdminPage() {
           action: 'upsert_blog',
           token: sessionToken,
           payload: {
-            id: blogForm.id.trim(),
+            id: cleanBlogId,
             title: blogForm.title.trim(),
             excerpt: blogForm.excerpt.trim(),
             content: blogForm.content.trim(),
@@ -695,7 +773,9 @@ export default function AdminPage() {
   };
 
   // Filtering inward logs
-  const filteredEnquiries = enquiries.filter(enq => enq.type === activeEnquiryFilter);
+  const filteredEnquiries = activeEnquiryFilter === 'all' 
+    ? enquiries 
+    : enquiries.filter(enq => enq.type === activeEnquiryFilter);
 
   // --- LOGIN SECURITY SHIELD GATE ---
   if (!isAuthenticated) {
@@ -951,32 +1031,112 @@ export default function AdminPage() {
         {activeSidebarTab === 'enquiries' && (
           <div className="space-y-6 animate-fade-in">
             
-            <div className="flex border-b border-slate-200 pb-px">
+            {/* Top Diagnostic & Status Header Bar */}
+            <div className="bg-white border border-slate-200 p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-2xs">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <Mail className="h-4 w-4 text-amber-600 shrink-0" />
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-900 font-mono">
+                    Official Inward Alert Recipient:
+                  </span>
+                  <span className="text-xs font-mono font-bold bg-amber-50 text-amber-800 px-2.5 py-0.5 border border-amber-200">
+                    {recipientEmails || 'contact@techsol.com.np'}
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-500 font-sans">
+                  All inward customer enquiries are recorded in PostgreSQL and dispatched directly to <strong className="text-slate-800 font-mono">contact@techsol.com.np</strong>.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={fetchLiveEnquiries}
+                  disabled={isRefreshing}
+                  className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-mono font-bold uppercase transition-all flex items-center gap-1.5 cursor-pointer"
+                  title="Query database live for latest enquiries"
+                >
+                  <RefreshCw className={`h-3.5 w-3.5 ${isRefreshing ? 'animate-spin text-amber-600' : ''}`} />
+                  <span>Refresh Logs</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleSendTestEmail()}
+                  disabled={sendingTestEmail}
+                  className="px-3.5 py-2 bg-slate-900 hover:bg-amber-600 text-white text-xs font-mono font-bold uppercase transition-all flex items-center gap-1.5 cursor-pointer"
+                  title="Trigger diagnostic test alert to contact@techsol.com.np"
+                >
+                  {sendingTestEmail ? (
+                    <>
+                      <Loader className="h-3.5 w-3.5 animate-spin text-white" />
+                      <span>Dispatching...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Send className="h-3.5 w-3.5 text-amber-400" />
+                      <span>Send Test Alert Email</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* Test Email Result Banner */}
+            {testEmailResult && (
+              <div className={`p-4 border font-mono text-xs flex items-center justify-between gap-3 ${
+                testEmailResult.startsWith('Success')
+                  ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
+                  : 'bg-amber-50 border-amber-200 text-amber-900'
+              }`}>
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600" />
+                  <span>{testEmailResult}</span>
+                </div>
+                <button
+                  onClick={() => setTestEmailResult(null)}
+                  className="text-slate-500 hover:text-slate-900 font-bold px-2 cursor-pointer"
+                >
+                  ✕
+                </button>
+              </div>
+            )}
+            
+            {/* Filter Tabs with Live Real-Time Count Badges */}
+            <div className="flex flex-wrap border-b border-slate-200 pb-px gap-1">
               {[
-                { filter: 'product', label: 'Technical Quotations' },
-                { filter: 'contact', label: 'Contact us Form Logs' },
-                { filter: 'chat', label: 'AI Support Chat Transcripts' }
+                { filter: 'all', label: 'All Inward Enquiries', count: enquiries.length },
+                { filter: 'contact', label: 'Contact us Form Logs', count: enquiries.filter(e => e.type === 'contact').length },
+                { filter: 'product', label: 'Technical Quotations', count: enquiries.filter(e => e.type === 'product').length },
+                { filter: 'chat', label: 'AI Support Chat Transcripts', count: enquiries.filter(e => e.type === 'chat').length }
               ].map((t) => (
                 <button
                   key={t.filter}
                   onClick={() => setActiveEnquiryFilter(t.filter as any)}
-                  className={`px-5 py-3 text-xs uppercase font-extrabold tracking-wider transition-all border-b-2 cursor-pointer ${
+                  className={`px-4 sm:px-5 py-3 text-xs uppercase font-extrabold tracking-wider transition-all border-b-2 cursor-pointer flex items-center gap-2 ${
                     activeEnquiryFilter === t.filter 
-                      ? 'border-amber-600 text-slate-950 font-black bg-slate-100/50'
-                      : 'border-transparent text-slate-400 hover:text-slate-855 hover:text-slate-800'
+                      ? 'border-amber-600 text-slate-950 font-black bg-slate-100/60'
+                      : 'border-transparent text-slate-500 hover:text-slate-800'
                   }`}
                 >
-                  {t.label}
+                  <span>{t.label}</span>
+                  <span className={`px-2 py-0.5 text-[10px] font-mono font-bold rounded-full ${
+                    activeEnquiryFilter === t.filter
+                      ? 'bg-amber-600 text-white'
+                      : 'bg-slate-200 text-slate-700'
+                  }`}>
+                    {t.count}
+                  </span>
                 </button>
               ))}
             </div>
 
-            <div className="flex justify-between items-center bg-white border border-slate-200 p-4">
-              <span className="text-[10px] uppercase font-mono text-slate-500 italic font-bold">
-                Logged records in Postgres: {filteredEnquiries.length} item(s) mapped
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-white border border-slate-200 p-4">
+              <span className="text-[11px] uppercase font-mono text-slate-600 font-bold">
+                Logged records in Postgres: <span className="text-amber-700 font-black">{filteredEnquiries.length} item(s)</span> mapped
               </span>
               <button
-                onClick={() => handleClearLogs(activeEnquiryFilter)}
+                onClick={() => handleClearLogs(activeEnquiryFilter === 'all' ? undefined : activeEnquiryFilter)}
                 className="text-[9px] font-mono font-bold bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-950 hover:text-white px-3 py-1.5 uppercase transition-all cursor-pointer font-black"
               >
                 Erase current filtered index logs
@@ -990,38 +1150,59 @@ export default function AdminPage() {
             ) : (
               <div className="space-y-4">
                 {filteredEnquiries.map((enq) => (
-                  <div key={enq.id} className="bg-white border border-slate-200 p-6 space-y-4 shadow-2xs">
+                  <div key={enq.id} className="bg-white border border-slate-200 p-6 space-y-4 shadow-2xs hover:border-slate-300 transition-colors">
                     
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-slate-100 pb-3">
-                      <div>
+                      <div className="flex flex-wrap items-center gap-2">
                         <span className="text-[10px] font-mono text-slate-400 block uppercase">
-                          RECORD NO: {enq.id}
+                          ID: {enq.id}
+                        </span>
+                        <span className={`text-[9px] font-mono font-bold uppercase px-2 py-0.5 rounded-sm ${
+                          enq.type === 'contact' 
+                            ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' 
+                            : enq.type === 'product'
+                            ? 'bg-blue-100 text-blue-800 border border-blue-200'
+                            : 'bg-indigo-100 text-indigo-800 border border-indigo-200'
+                        }`}>
+                          {enq.type === 'contact' ? 'Contact us Form' : enq.type === 'product' ? 'Technical Quotation' : 'AI Assistant Chat'}
                         </span>
                         <h3 className="text-sm font-black text-slate-900 font-mono">
                           Client: {enq.client_name}
                         </h3>
                       </div>
-                      <span className="text-[10px] font-mono text-slate-400">
-                        {new Date(enq.created_at).toLocaleString('en-US', { timeZone: 'Asia/Kathmandu' })}
+                      <span className="text-[10px] font-mono text-slate-500 font-medium">
+                        {new Date(enq.created_at).toLocaleString('en-US', { timeZone: 'Asia/Kathmandu' })} (Nepal Time)
                       </span>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 text-xs font-mono">
                       <div>
-                        <span className="text-[10px] text-slate-400 uppercase italic">Contact Number</span>
-                        <p className="font-semibold text-slate-850 select-all">{enq.client_phone || 'N/A'}</p>
+                        <span className="text-[10px] text-slate-400 uppercase italic">Contact Phone</span>
+                        <p className="font-semibold text-slate-850">
+                          {enq.client_phone ? (
+                            <a href={`tel:${enq.client_phone}`} className="text-amber-700 hover:underline select-all">
+                              {enq.client_phone}
+                            </a>
+                          ) : 'N/A'}
+                        </p>
+                      </div>
+                      <div>
+                        <span className="text-[10px] text-slate-400 uppercase italic">Client Email</span>
+                        <p className="font-semibold text-slate-850 truncate">
+                          {enq.client_email ? (
+                            <a href={`mailto:${enq.client_email}`} className="text-amber-700 hover:underline select-all" title={enq.client_email}>
+                              {enq.client_email}
+                            </a>
+                          ) : 'Not specified'}
+                        </p>
                       </div>
                       <div>
                         <span className="text-[10px] text-slate-400 uppercase italic">HQ / Location</span>
                         <p className="font-bold text-slate-850 truncate" title={enq.client_address}>{enq.client_address || 'N/A'}</p>
                       </div>
                       <div>
-                        <span className="text-[10px] text-slate-400 uppercase italic">Industry Sector</span>
-                        <p className="font-semibold text-slate-800">{enq.industry || 'Other'}</p>
-                      </div>
-                      <div>
-                        <span className="text-[10px] text-slate-400 uppercase italic">Model Requested</span>
-                        <span className="bg-amber-100 text-amber-800 text-[9px] font-black px-2 py-0.5 uppercase inline-block mt-0.5">
+                        <span className="text-[10px] text-slate-400 uppercase italic">Industry / Product</span>
+                        <span className="bg-amber-100 text-amber-800 text-[10px] font-black px-2 py-0.5 uppercase inline-block mt-0.5">
                           {enq.inquiry_type_or_model}
                         </span>
                       </div>
@@ -1034,6 +1215,39 @@ export default function AdminPage() {
                       <p className="text-xs text-slate-750 font-serif leading-relaxed select-all">
                         {enq.description || 'No direct notes attached.'}
                       </p>
+                    </div>
+
+                    {/* Email Routing Status and Direct Dispatch Buttons */}
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2 border-t border-slate-100 font-mono text-xs">
+                      <div className="flex items-center gap-2">
+                        <Mail className="h-3.5 w-3.5 text-amber-600 shrink-0" />
+                        <span className="text-[10px] text-slate-500 uppercase">Alert Delivery:</span>
+                        <span className="text-[10px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-xs">
+                          {enq.email_status || 'Delivered to contact@techsol.com.np'}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handleSendTestEmail(enq.id)}
+                          disabled={resendingId === enq.id}
+                          className="px-2.5 py-1 text-[10px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 transition-colors cursor-pointer flex items-center gap-1"
+                        >
+                          {resendingId === enq.id ? <Loader className="h-3 w-3 animate-spin" /> : <Send className="h-3 w-3 text-amber-600" />}
+                          <span>Resend to contact@techsol.com.np</span>
+                        </button>
+
+                        {enq.client_phone && (
+                          <a
+                            href={`tel:${enq.client_phone}`}
+                            className="px-2.5 py-1 text-[10px] font-bold bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 transition-colors inline-flex items-center gap-1"
+                          >
+                            <Phone className="h-3 w-3 text-amber-600" />
+                            <span>Call</span>
+                          </a>
+                        )}
+                      </div>
                     </div>
 
                     {enq.type === 'chat' && enq.session_chat_history && enq.session_chat_history !== 'synced' && (
@@ -2001,14 +2215,32 @@ export default function AdminPage() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <label className="text-[10px] font-mono uppercase text-slate-400 block font-bold">Post ID Slug key *</label>
+                    <div className="flex items-center justify-between">
+                      <label className="text-[10px] font-mono uppercase text-slate-400 block font-bold">Post ID Slug key *</label>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const generated = (blogForm.title || '')
+                            .toLowerCase()
+                            .replace(/[^a-z0-9]+/g, '-')
+                            .replace(/^-+|-+$/g, '');
+                          if (generated) setBlogForm({ ...blogForm, id: generated });
+                        }}
+                        className="text-[9px] font-mono text-amber-600 hover:text-slate-900 underline cursor-pointer"
+                      >
+                        Auto-generate from title
+                      </button>
+                    </div>
                     <input
                       type="text"
                       required
                       placeholder="e.g. dynamic-roller-spiced"
                       disabled={!!editingId}
                       value={blogForm.id}
-                      onChange={(e) => setBlogForm({ ...blogForm, id: e.target.value })}
+                      onChange={(e) => {
+                        const cleaned = e.target.value.toLowerCase().replace(/\s+/g, '-');
+                        setBlogForm({ ...blogForm, id: cleaned });
+                      }}
                       className="w-full border border-slate-200 px-4 py-2.5 text-xs rounded-none font-mono"
                     />
                   </div>
@@ -2417,47 +2649,140 @@ export default function AdminPage() {
               </div>
 
               <form onSubmit={saveSettingsChanges} className="space-y-6">
-                <div className="space-y-4 font-normal">
+                <div className="space-y-5 font-normal">
                   
+                  {/* Recipient Emails */}
+                  <div className="space-y-1 bg-amber-50/50 p-4 border border-amber-200">
+                    <div className="flex items-center justify-between">
+                      <label className="text-[10px] font-mono font-bold uppercase text-slate-800 block">
+                        Inward Alerts Recipient Email(s) *
+                      </label>
+                      <span className="text-[9px] font-mono font-bold text-amber-700 bg-amber-100 px-2 py-0.5">
+                        Active Destination
+                      </span>
+                    </div>
+                    <input
+                      type="text"
+                      required
+                      value={recipientEmails}
+                      onChange={(e) => setRecipientEmails(e.target.value)}
+                      placeholder="contact@techsol.com.np"
+                      className="w-full border border-slate-300 focus:border-amber-600 px-4 py-2.5 text-xs rounded-none outline-none font-mono bg-white"
+                    />
+                    <span className="text-[9px] text-slate-600 font-mono block">
+                      All inward enquiries from Contact Us, Product Quotations, and AI Assistant are delivered directly here.
+                    </span>
+                  </div>
+
+                  {/* SMTP Server Configuration */}
+                  <div className="space-y-3 p-4 bg-slate-50 border border-slate-200">
+                    <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                      <span className="text-xs font-mono font-bold uppercase text-slate-800 flex items-center gap-1.5">
+                        <Mail className="h-4 w-4 text-amber-600" />
+                        <span>Corporate SMTP Outbound Server (Direct Relay)</span>
+                      </span>
+                      <span className="text-[9px] font-mono text-slate-500 uppercase">Optional / Direct Mail</span>
+                    </div>
+                    
+                    <p className="text-[11px] text-slate-500 leading-relaxed font-sans">
+                      Connect your corporate mail server (e.g., cPanel, Google Workspace, Hostinger, or Microsoft 365) to deliver emails directly via authenticated SMTP. If not set, our automated Gateway delivers to <strong>contact@techsol.com.np</strong>.
+                    </p>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <div className="sm:col-span-2 space-y-1">
+                        <label className="text-[9px] font-mono uppercase text-slate-500 font-bold block">SMTP Host</label>
+                        <input
+                          type="text"
+                          value={smtpHost}
+                          onChange={(e) => setSmtpHost(e.target.value)}
+                          placeholder="e.g. mail.techsol.com.np or smtp.gmail.com"
+                          className="w-full border border-slate-200 focus:border-amber-600 px-3 py-2 text-xs font-mono bg-white outline-none"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[9px] font-mono uppercase text-slate-500 font-bold block">Port</label>
+                        <input
+                          type="text"
+                          value={smtpPort}
+                          onChange={(e) => setSmtpPort(e.target.value)}
+                          placeholder="587 or 465"
+                          className="w-full border border-slate-200 focus:border-amber-600 px-3 py-2 text-xs font-mono bg-white outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <label className="text-[9px] font-mono uppercase text-slate-500 font-bold block">SMTP Username</label>
+                        <input
+                          type="text"
+                          value={smtpUser}
+                          onChange={(e) => setSmtpUser(e.target.value)}
+                          placeholder="e.g. contact@techsol.com.np"
+                          className="w-full border border-slate-200 focus:border-amber-600 px-3 py-2 text-xs font-mono bg-white outline-none"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[9px] font-mono uppercase text-slate-500 font-bold block">SMTP Password / App Password</label>
+                        <input
+                          type="password"
+                          value={smtpPass}
+                          onChange={(e) => setSmtpPass(e.target.value)}
+                          placeholder="••••••••••••"
+                          className="w-full border border-slate-200 focus:border-amber-600 px-3 py-2 text-xs font-mono bg-white outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-[9px] font-mono uppercase text-slate-500 font-bold block">Sender From Header</label>
+                      <input
+                        type="text"
+                        value={smtpFrom}
+                        onChange={(e) => setSmtpFrom(e.target.value)}
+                        placeholder="Techsol International <contact@techsol.com.np>"
+                        className="w-full border border-slate-200 focus:border-amber-600 px-3 py-2 text-xs font-mono bg-white outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Google Sheet ID */}
                   <div className="space-y-1">
                     <label className="text-[10px] font-mono font-bold uppercase text-slate-400 block">
-                      Target Google Sheet ID
+                      Target Google Sheet ID (Optional Sync)
                     </label>
                     <input
                       type="text"
                       value={spreadsheetId}
                       onChange={(e) => setSpreadsheetId(e.target.value)}
                       placeholder="e.g. 1aBCdEFgHI-jKLmNoPQRsTuvWxYz_12345678"
-                      className="w-full border border-slate-200 focus:border-amber-600 px-4 py-3 text-xs font-mono rounded-none outline-none"
+                      className="w-full border border-slate-200 focus:border-amber-600 px-4 py-2.5 text-xs font-mono rounded-none outline-none"
                     />
                     <span className="text-[9px] text-slate-400 font-mono block leading-relaxed">Extract from Sheets spreadsheet URL: /d/&lt;_Spreadsheet_ID_&gt;/edit.</span>
                   </div>
 
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-mono font-bold uppercase text-slate-400 block">
-                      Inward Warning Alerts Recipient Emails (Separated by commas)
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={recipientEmails}
-                      onChange={(e) => setRecipientEmails(e.target.value)}
-                      placeholder="e.g. info@techsol.international, hq@techsol.international"
-                      className="w-full border border-slate-200 focus:border-amber-600 px-4 py-3 text-xs rounded-none outline-none font-mono"
-                    />
-                    <span className="text-[9px] text-slate-400 font-mono block">Instantly notify designated mill engineering leads upon customer quote applications.</span>
-                  </div>
-
                 </div>
 
-                <button
-                  type="submit"
-                  disabled={isSaving}
-                  className="bg-slate-900 hover:bg-amber-600 text-white font-bold text-xs tracking-wider uppercase py-3.5 px-6 rounded-none flex items-center gap-2 cursor-pointer transition-colors"
-                >
-                  {isSaving ? <Loader className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-                  <span>Persist setup configurations</span>
-                </button>
+                <div className="flex flex-wrap items-center gap-3 pt-2">
+                  <button
+                    type="submit"
+                    disabled={isSaving}
+                    className="bg-slate-900 hover:bg-amber-600 text-white font-bold text-xs tracking-wider uppercase py-3.5 px-6 rounded-none flex items-center gap-2 cursor-pointer transition-colors"
+                  >
+                    {isSaving ? <Loader className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                    <span>Persist setup configurations</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleSendTestEmail()}
+                    disabled={sendingTestEmail}
+                    className="border border-slate-300 hover:border-slate-800 bg-white text-slate-800 font-mono font-bold text-xs tracking-wider uppercase py-3.5 px-5 rounded-none flex items-center gap-2 cursor-pointer transition-colors"
+                  >
+                    {sendingTestEmail ? <Loader className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4 text-amber-600" />}
+                    <span>Send Diagnostic Test Alert</span>
+                  </button>
+                </div>
               </form>
 
             </div>

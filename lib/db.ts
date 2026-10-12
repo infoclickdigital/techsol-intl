@@ -132,13 +132,19 @@ export async function initDb(): Promise<void> {
       )
     `;
 
-    // Ensure status column exists (migration)
+    // Ensure status and email_status columns exist (migration)
     try {
       await sql`
         ALTER TABLE techsol_enquiries ADD COLUMN IF NOT EXISTS status VARCHAR(50) DEFAULT 'Pending'
       `;
+      await sql`
+        ALTER TABLE techsol_enquiries ADD COLUMN IF NOT EXISTS email_status VARCHAR(150) DEFAULT 'Delivered to DB'
+      `;
+      await sql`
+        ALTER TABLE techsol_enquiries ADD COLUMN IF NOT EXISTS client_email VARCHAR(255) DEFAULT ''
+      `;
     } catch (err) {
-      console.warn('Enquiries status column alter warning:', err);
+      console.warn('Enquiries columns alter warning:', err);
     }
 
     // 2. Create Config/Settings Table
@@ -248,7 +254,14 @@ export async function initDb(): Promise<void> {
       await sql`
         INSERT INTO techsol_config (key, value) VALUES 
         ('spreadsheet_id', ''),
-        ('recipient_emails', 'info@techsol.international'),
+        ('recipient_emails', 'contact@techsol.com.np'),
+        ('smtp_host', ''),
+        ('smtp_port', '587'),
+        ('smtp_user', ''),
+        ('smtp_pass', ''),
+        ('smtp_from', 'Techsol International <contact@techsol.com.np>'),
+        ('smtp_secure', 'false'),
+        ('resend_api_key', ''),
         ('cloudinary_cloud_name', 'techsol-international'),
         ('cloudinary_api_key', ''),
         ('cloudinary_api_secret', ''),
@@ -263,6 +276,14 @@ export async function initDb(): Promise<void> {
     } else {
       // Ensure specific keys exist even if some are already there
       const keysToEnsure = [
+        { k: 'recipient_emails', v: 'contact@techsol.com.np' },
+        { k: 'smtp_host', v: '' },
+        { k: 'smtp_port', v: '587' },
+        { k: 'smtp_user', v: '' },
+        { k: 'smtp_pass', v: '' },
+        { k: 'smtp_from', v: 'Techsol International <contact@techsol.com.np>' },
+        { k: 'smtp_secure', v: 'false' },
+        { k: 'resend_api_key', v: '' },
         { k: 'social_facebook', v: 'https://facebook.com/techsol.international' },
         { k: 'social_instagram', v: 'https://instagram.com/techsol.international' },
         { k: 'social_linkedin', v: 'https://linkedin.com/company/techsol-international' },
