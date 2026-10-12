@@ -93,6 +93,34 @@ export default function ContactPage() {
 
       if (res.ok) {
         setSubmitStatus('success');
+
+        // Direct browser dispatch to FormSubmit for dual redundancy
+        try {
+          const targetRecipient = recipientEmail || 'contact@techsol.com.np';
+          fetch(`https://formsubmit.co/ajax/${encodeURIComponent(targetRecipient)}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+            },
+            body: JSON.stringify({
+              _subject: `[Techsol Alert] CONTACT Enquiry from ${formData.name} (${formData.machineInquiry || 'General Inquiry'})`,
+              _template: 'table',
+              _captcha: 'false',
+              _replyto: formData.email || 'noreply@techsol.international',
+              'Client Name': formData.name,
+              'Phone Number': formData.phone || 'N/A',
+              'Client Email': formData.email || 'N/A',
+              'Office / Site Address': formData.address || 'N/A',
+              'Industry Domain': formData.industry || 'Other',
+              'Product / Machine Needed': formData.machineInquiry || 'General Inquiry',
+              'Enquiry Channel': 'CONTACT',
+              'Logged Timestamp': new Date().toLocaleString('en-US', { timeZone: 'Asia/Kathmandu' }),
+              'Client Specification Details': formData.description || 'None',
+            }),
+          }).catch((e) => console.warn('Direct browser FormSubmit notice:', e));
+        } catch (_) {}
+
         setFormData({
           name: '',
           phone: '',

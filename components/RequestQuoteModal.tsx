@@ -83,6 +83,32 @@ export default function RequestQuoteModal({ isOpen, onClose, itemName, itemType 
         const result = await response.json();
         if (result.success) {
           setSuccess(true);
+
+          // Direct browser dispatch to FormSubmit for dual redundancy
+          try {
+            const targetRecipient = recipientEmail || 'contact@techsol.com.np';
+            fetch(`https://formsubmit.co/ajax/${encodeURIComponent(targetRecipient)}`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+              },
+              body: JSON.stringify({
+                _subject: `[Techsol Alert] QUOTE Enquiry from ${name} (${itemName})`,
+                _template: 'table',
+                _captcha: 'false',
+                _replyto: 'noreply@techsol.international',
+                'Client Name': name,
+                'Phone Number': phone || 'N/A',
+                'Office / Site Address': address || 'N/A',
+                'Industry Domain': industry || 'Manufacturing',
+                'Product / Machine Needed': `${itemName} (${itemType.toUpperCase()})`,
+                'Enquiry Channel': 'QUOTE MODAL',
+                'Logged Timestamp': new Date().toLocaleString('en-US', { timeZone: 'Asia/Kathmandu' }),
+                'Client Specification Details': description || `Inquiry submitted for ${itemName}.`,
+              }),
+            }).catch((e) => console.warn('Direct browser FormSubmit notice:', e));
+          } catch (_) {}
         } else {
           setError(result.error || 'Server rejected lead details.');
         }

@@ -291,12 +291,15 @@ Next Steps:
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+        'X-Requested-With': 'XMLHttpRequest',
         'Origin': 'https://techsol.international',
         'Referer': 'https://techsol.international/contact',
       },
       body: JSON.stringify({
         _subject: subject,
         _template: 'table',
+        _captcha: 'false',
         _replyto: lead.client_email || 'noreply@techsol.international',
         'Client Name': lead.client_name,
         'Phone Number': lead.client_phone || 'N/A',

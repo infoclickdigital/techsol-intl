@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
       leadData = {
         id: `test_${Date.now()}`,
         type: 'contact',
-        client_name: 'Techsol Verification Test Lead',
+        client_name: '[ADMIN TEST] Techsol Connectivity Check',
         client_phone: '9851218867',
         client_email: customRecipient || 'contact@techsol.com.np',
         client_address: 'Biratnagar-5 / Kathmandu',
@@ -50,10 +50,13 @@ export async function POST(req: NextRequest) {
       created_at: leadData.created_at ? new Date(leadData.created_at).toLocaleString('en-US', { timeZone: 'Asia/Kathmandu' }) : undefined,
     });
 
-    if (enquiryId && result.success) {
+    if (enquiryId) {
+      const statusText = result.success
+        ? `Sent (${result.method}) to ${result.recipient}`
+        : `Delivery pending: ${result.message}`;
       await sql`
         UPDATE techsol_enquiries 
-        SET email_status = ${`Sent (${result.method}) to ${result.recipient}`}
+        SET email_status = ${statusText}
         WHERE id = ${enquiryId}
       `;
     }
