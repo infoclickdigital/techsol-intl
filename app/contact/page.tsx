@@ -191,8 +191,8 @@ export default function ContactPage() {
               
               {/* Row 1: Name and Phone */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <label htmlFor="contact-name" className="text-[10px] font-bold text-slate-400 uppercase tracking-widest font-mono">
+                <div className="space-y-1.5">
+                  <label htmlFor="contact-name" className="text-xs font-semibold text-slate-700 block">
                     Representative Name *
                   </label>
                   <input
@@ -203,12 +203,12 @@ export default function ContactPage() {
                     value={formData.name}
                     onChange={handleChange}
                     placeholder="e.g. Binayak Adhikari"
-                    className="w-full border border-slate-200 focus:border-amber-600 transition-colors px-4 py-3 leading-tight placeholder-slate-300 text-xs sm:text-sm rounded-none outline-none"
+                    className="w-full border border-slate-200 focus:border-amber-600 focus:bg-white bg-slate-50 transition-colors px-4 min-h-[44px] leading-tight placeholder-slate-400 text-sm text-slate-900 rounded-lg outline-none"
                   />
                 </div>
 
-                <div className="space-y-1">
-                  <label htmlFor="contact-phone" className="text-[10px] font-bold text-slate-400 uppercase tracking-widest font-mono">
+                <div className="space-y-1.5">
+                  <label htmlFor="contact-phone" className="text-xs font-semibold text-slate-700 block">
                     Phone Number (Nepal) *
                   </label>
                   <input
@@ -218,15 +218,15 @@ export default function ContactPage() {
                     required
                     value={formData.phone}
                     onChange={handleChange}
-                    placeholder="e.g. +977-9851000000"
-                    className="w-full border border-slate-200 focus:border-amber-600 transition-colors px-4 py-3 leading-tight placeholder-slate-300 text-xs sm:text-sm rounded-none outline-none"
+                    placeholder="e.g. 9851000000"
+                    className="w-full border border-slate-200 focus:border-amber-600 focus:bg-white bg-slate-50 transition-colors px-4 min-h-[44px] leading-tight placeholder-slate-400 text-sm text-slate-900 rounded-lg outline-none"
                   />
                 </div>
               </div>
 
               {/* Row 2: Address and Site Location */}
-              <div className="space-y-1">
-                <label htmlFor="contact-address" className="text-[10px] font-bold text-slate-400 uppercase tracking-widest font-mono">
+              <div className="space-y-1.5">
+                <label htmlFor="contact-address" className="text-xs font-semibold text-slate-700 block">
                   Site or Office Address *
                 </label>
                 <input
@@ -236,15 +236,15 @@ export default function ContactPage() {
                   required
                   value={formData.address}
                   onChange={handleChange}
-                  placeholder="e.g. Industrial District, Bhairahawa, Nepal"
-                  className="w-full border border-slate-200 focus:border-amber-600 transition-colors px-4 py-3 leading-tight placeholder-slate-300 text-xs sm:text-sm rounded-none outline-none"
+                  placeholder="e.g. Biratnagar or Kathmandu, Nepal"
+                  className="w-full border border-slate-200 focus:border-amber-600 focus:bg-white bg-slate-50 transition-colors px-4 min-h-[44px] leading-tight placeholder-slate-400 text-sm text-slate-900 rounded-lg outline-none"
                 />
               </div>
 
               {/* Row 3: Industry & Machine Class */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <label htmlFor="contact-industry" className="text-[10px] font-bold text-slate-400 uppercase tracking-widest font-mono">
+                <div className="space-y-1.5">
+                  <label htmlFor="contact-industry" className="text-xs font-semibold text-slate-700 block">
                     Industry Domain / Sector
                   </label>
                   <select
@@ -252,7 +252,7 @@ export default function ContactPage() {
                     name="industry"
                     value={formData.industry}
                     onChange={handleChange}
-                    className="w-full border border-slate-200 focus:border-amber-600 bg-white transition-colors px-4 py-3.5 leading-tight text-xs sm:text-sm rounded-none outline-none"
+                    className="w-full border border-slate-200 focus:border-amber-600 bg-slate-50 focus:bg-white transition-colors px-4 min-h-[44px] leading-tight text-sm text-slate-900 rounded-lg outline-none"
                   >
                     <option value="">-- Select Industry sector --</option>
                     <option value="Bakery & Confectionery">Bakery & Confectionery</option>
@@ -264,8 +264,8 @@ export default function ContactPage() {
                   </select>
                 </div>
 
-                <div className="space-y-1">
-                  <label htmlFor="contact-machine" className="text-[10px] font-bold text-slate-400 uppercase tracking-widest font-mono">
+                <div className="space-y-1.5">
+                  <label htmlFor="contact-machine" className="text-xs font-semibold text-slate-700 block">
                     Hardware Inquired
                   </label>
                   <select
@@ -273,7 +273,7 @@ export default function ContactPage() {
                     name="machineInquiry"
                     value={formData.machineInquiry}
                     onChange={handleChange}
-                    className="w-full border border-slate-200 focus:border-amber-600 bg-white transition-colors px-4 py-3.5 leading-tight text-xs sm:text-sm rounded-none outline-none"
+                    className="w-full border border-slate-200 focus:border-amber-600 bg-slate-50 focus:bg-white transition-colors px-4 min-h-[44px] leading-tight text-sm text-slate-900 rounded-lg outline-none"
                   >
                     <option value="">-- Select Solution Category --</option>
                     <option value="Food Flavours (Powder)">Food Flavours (Powder)</option>
@@ -289,8 +289,8 @@ export default function ContactPage() {
               </div>
 
               {/* Row 4: Enquiry specifications */}
-              <div className="space-y-1">
-                <label htmlFor="contact-description" className="text-[10px] font-bold text-slate-400 uppercase tracking-widest font-mono">
+              <div className="space-y-1.5">
+                <label htmlFor="contact-description" className="text-xs font-semibold text-slate-700 block">
                   Factory Requirements & Capacity (TPH)
                 </label>
                 <textarea
@@ -300,16 +300,16 @@ export default function ContactPage() {
                   value={formData.description}
                   onChange={handleChange}
                   placeholder="e.g. Please supply quotation for 500 lbs of Liquid Mango Flavour and Custom Spice season blends formulation for noodle snacks processing line."
-                  className="w-full border border-slate-200 focus:border-amber-600 transition-colors px-4 py-3 leading-relaxed placeholder-slate-300 text-xs sm:text-sm rounded-none outline-none resize-none"
+                  className="w-full border border-slate-200 focus:border-amber-600 focus:bg-white bg-slate-50 transition-colors p-4 leading-relaxed placeholder-slate-400 text-sm text-slate-900 rounded-lg outline-none resize-none"
                 />
               </div>
 
-              {/* Submit Button */}
+              {/* Submit Button (Minimum 44x44px touch target) */}
               <button
                 id="contact-submit"
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full bg-slate-900 text-white hover:bg-amber-600 transition-colors py-3.5 sm:py-4 font-black text-xs sm:text-sm tracking-wider uppercase flex items-center justify-center gap-2 rounded-none disabled:opacity-50 mt-4 cursor-pointer align-middle"
+                className="w-full min-h-[48px] bg-slate-900 text-white hover:bg-amber-600 transition-colors py-3.5 font-bold text-sm tracking-wide rounded-lg disabled:opacity-50 mt-4 cursor-pointer flex items-center justify-center gap-2 shadow-sm"
               >
                 {isSubmitting ? (
                   <>

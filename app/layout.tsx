@@ -147,84 +147,84 @@ export default async function RootLayout({
         <ScrollToTop />
 
         {/* Corporate Footer with Social icons, Quick links and contact details */}
-        <footer className="bg-slate-950 text-slate-350 py-12 px-4 sm:px-8 border-t border-slate-900 select-text">
+        <footer className="bg-white text-slate-700 py-12 px-4 sm:px-8 border-t border-slate-200 select-text">
           <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 text-sm">
             
             {/* Info Col (4 Cols) */}
             <div className="md:col-span-4 space-y-5">
-              <Logo size="lg" className="brightness-110 contrast-115 grayscale-0 invert-0" />
-              <p className="text-xs text-slate-400 leading-relaxed font-sans max-w-sm">
+              <Logo size="lg" className="brightness-100 contrast-100 grayscale-0 invert-0" />
+              <p className="text-xs text-slate-600 leading-relaxed font-sans max-w-sm">
                 Nepal’s preferred gateway for advanced optical photoelectric sortation plants, high-yield grain processing mills, liquid packaging, and central PLC logic orchestration. Fully integrated engineering workflows.
               </p>
               
-              {/* Social Media icons */}
-              <div className="flex items-center gap-3.5 pt-2">
+              {/* Social Media icons with minimum 44x44px touch targets */}
+              <div className="flex items-center gap-3 pt-2">
                 <a 
                   href={facebook} 
                   target="_blank" 
                   rel="noopener noreferrer" 
-                  className="p-2 bg-slate-900 hover:bg-amber-600 text-slate-400 hover:text-white transition-all rounded"
+                  className="w-11 h-11 flex items-center justify-center bg-slate-50 hover:bg-amber-600 text-slate-700 hover:text-white transition-all rounded-lg border border-slate-200 hover:border-amber-600 shadow-xs"
                   id="footer-social-fb"
                   aria-label="Facebook Link"
                 >
-                  <Facebook className="h-4 w-4" />
+                  <Facebook className="h-4.5 w-4.5" />
                 </a>
                 <a 
                   href={instagram} 
                   target="_blank" 
                   rel="noopener noreferrer" 
-                  className="p-2 bg-slate-900 hover:bg-amber-600 text-slate-400 hover:text-white transition-all rounded"
+                  className="w-11 h-11 flex items-center justify-center bg-slate-50 hover:bg-amber-600 text-slate-700 hover:text-white transition-all rounded-lg border border-slate-200 hover:border-amber-600 shadow-xs"
                   id="footer-social-ig"
                   aria-label="Instagram Link"
                 >
-                  <Instagram className="h-4 w-4" />
+                  <Instagram className="h-4.5 w-4.5" />
                 </a>
                 <a 
                   href={linkedin} 
                   target="_blank" 
                   rel="noopener noreferrer" 
-                  className="p-2 bg-slate-900 hover:bg-amber-600 text-slate-400 hover:text-white transition-all rounded"
+                  className="w-11 h-11 flex items-center justify-center bg-slate-50 hover:bg-amber-600 text-slate-700 hover:text-white transition-all rounded-lg border border-slate-200 hover:border-amber-600 shadow-xs"
                   id="footer-social-ln"
                   aria-label="LinkedIn Link"
                 >
-                  <Linkedin className="h-4 w-4" />
+                  <Linkedin className="h-4.5 w-4.5" />
                 </a>
               </div>
             </div>
 
-            {/* Quick Links (4 Cols) */}
+            {/* Quick Links (3 Cols) */}
             <div className="md:col-span-3 space-y-4">
-              <h4 className="text-xs font-bold uppercase tracking-wider font-mono text-amber-500">
+              <h4 className="text-xs font-bold uppercase tracking-wider font-mono text-slate-900">
                 Quick Navigation
               </h4>
-              <ul className="space-y-2 text-xs text-slate-400">
+              <ul className="space-y-1.5 text-xs text-slate-600 font-medium">
                 <li>
-                  <Link href="/" className="hover:text-amber-500 hover:underline transition-all block">
+                  <Link href="/" className="hover:text-amber-600 hover:underline transition-colors py-1 block">
                     &raquo; Home
                   </Link>
                 </li>
                 <li>
-                  <Link href="/about" className="hover:text-amber-500 hover:underline transition-all block">
+                  <Link href="/about" className="hover:text-amber-600 hover:underline transition-colors py-1 block">
                     &raquo; Corporate Structure (About)
                   </Link>
                 </li>
                 <li>
-                  <Link href="/services" className="hover:text-amber-500 hover:underline transition-all block">
+                  <Link href="/services" className="hover:text-amber-600 hover:underline transition-colors py-1 block">
                     &raquo; Engineering Services
                   </Link>
                 </li>
                 <li>
-                  <Link href="/products" className="hover:text-amber-500 hover:underline transition-all block">
+                  <Link href="/products" className="hover:text-amber-600 hover:underline transition-colors py-1 block">
                     &raquo; Industrial Machinery Catalog
                   </Link>
                 </li>
                 <li>
-                  <Link href="/blogs" className="hover:text-amber-500 hover:underline transition-all block">
+                  <Link href="/blogs" className="hover:text-amber-600 hover:underline transition-colors py-1 block">
                     &raquo; Tech Articles & Blogs
                   </Link>
                 </li>
                 <li>
-                  <Link href="/contact" className="hover:text-amber-500 hover:underline transition-all block">
+                  <Link href="/contact" className="hover:text-amber-600 hover:underline transition-colors py-1 block">
                     &raquo; Contact Headquarters
                   </Link>
                 </li>
@@ -241,7 +241,7 @@ export default async function RootLayout({
 
           </div>
 
-          <div className="max-w-7xl mx-auto border-t border-slate-900 mt-10 pt-6 flex flex-col md:flex-row items-center justify-between text-xs text-slate-500 gap-4">
+          <div className="max-w-7xl mx-auto border-t border-slate-200 mt-10 pt-6 flex flex-col md:flex-row items-center justify-between text-xs text-slate-500 gap-4">
             <div>
               &copy; 2026 Techsol International, Nepal. All rights registered reserved.
             </div>

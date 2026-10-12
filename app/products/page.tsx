@@ -116,16 +116,16 @@ export default function ProductsPage() {
           </p>
         </div>
 
-        {/* Tab Controls */}
-        <div className="flex flex-wrap gap-2 border-b border-slate-200 pb-4">
+        {/* Tab Controls (Minimum 44x44px touch targets) */}
+        <div className="flex flex-wrap gap-2.5 border-b border-slate-200 pb-4">
           {(['all', 'spices', 'bakery', 'confectionery', 'beverages'] as const).map((cat) => (
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
-              className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider rounded-none transition-all duration-150 cursor-pointer ${
+              className={`min-h-[44px] px-4 py-2.5 text-xs font-bold uppercase tracking-wider rounded-lg transition-all duration-150 cursor-pointer ${
                 activeCategory === cat
                   ? 'bg-slate-900 text-white font-extrabold shadow-sm'
-                  : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+                  : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
               }`}
             >
               {cat === 'all' ? 'All Ingredient Lines' : cat}
@@ -176,21 +176,21 @@ export default function ProductsPage() {
                   </div>
                 </div>
 
-                {/* CTAs */}
-                <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
+                {/* CTAs (Minimum 44x44px touch targets) */}
+                <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between gap-2">
                   <button
                     onClick={() => handleRequestQuote(p.name)}
-                    className="bg-slate-900 text-white hover:bg-amber-600 transition-colors font-mono font-bold text-[9px] tracking-widest uppercase px-4 py-2.5 rounded-none inline-flex items-center gap-1 cursor-pointer"
+                    className="min-h-[44px] bg-slate-900 text-white hover:bg-amber-600 transition-colors font-medium text-xs tracking-wider uppercase px-4 py-2.5 rounded-lg inline-flex items-center gap-1.5 cursor-pointer shadow-xs"
                   >
                     <span>Request Sample</span>
-                    <ArrowUpRight className="h-3.5 w-3.5" />
+                    <ArrowUpRight className="h-4 w-4" />
                   </button>
 
                   <Link 
                     href={`/products/${p.id}`}
-                    className="border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors font-mono text-[9px] tracking-widest uppercase px-3.5 py-2.5 rounded-none inline-flex items-center gap-1"
+                    className="min-h-[44px] border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors font-medium text-xs tracking-wider uppercase px-4 py-2.5 rounded-lg inline-flex items-center gap-1.5"
                   >
-                    <Eye className="h-3.5 w-3.5 animate-pulse" />
+                    <Eye className="h-4 w-4" />
                     <span>Details</span>
                   </Link>
                 </div>

@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Target, Eye, CheckCircle2, Loader, Star, Quote, ArrowLeft, ArrowRight } from 'lucide-react';
+import Link from 'next/link';
+import { Target, Eye, CheckCircle2, Loader, Star, Quote, ArrowLeft, ArrowRight, Cookie, CupSoda, Milk, Flame, MapPin } from 'lucide-react';
 import { motion } from 'motion/react';
 
 export default function AboutPage() {
@@ -209,36 +210,36 @@ export default function AboutPage() {
             </div>
           </div>
 
-          {/* Graphical Side-block: ISO & Certifications */}
-          <div className="lg:col-span-5 bg-slate-900 text-white p-8 sm:p-10 space-y-8 flex flex-col justify-between min-h-[300px]">
+          {/* Graphical Side-block: Operational Framework & Standards (Crisp Light Theme) */}
+          <div className="lg:col-span-5 bg-white border border-slate-200 shadow-xs rounded-xl text-slate-900 p-8 sm:p-10 space-y-8 flex flex-col justify-between min-h-[300px]">
             <div className="space-y-4">
-              <h4 className="text-xs font-bold uppercase tracking-widest text-amber-500 font-mono">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-amber-600 font-mono">
                 Operational Framework
               </h4>
-              <p className="text-xs text-slate-350 leading-relaxed">
+              <p className="text-xs text-slate-600 leading-relaxed font-sans">
                 {cms.about_operational_framework}
               </p>
             </div>
 
-            <div className="space-y-4 pt-4 border-t border-slate-800">
+            <div className="space-y-4 pt-4 border-t border-slate-200">
               <div className="flex items-start gap-3">
-                <CheckCircle2 className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
+                <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0 mt-0.5" />
                 <div className="text-xs space-y-0.5">
-                  <span className="font-bold text-white block">{cms.about_cert_1_title || 'Government Grade 1'}</span>
-                  <span className="text-slate-400">{cms.about_cert_1_desc || 'Certified for handling multi-TPH heavy milling erections.'}</span>
+                  <span className="font-bold text-slate-900 block">{cms.about_cert_1_title || 'Government Grade 1'}</span>
+                  <span className="text-slate-500">{cms.about_cert_1_desc || 'Certified for handling multi-TPH heavy milling erections.'}</span>
                 </div>
               </div>
 
               <div className="flex items-start gap-3">
-                <CheckCircle2 className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
+                <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0 mt-0.5" />
                 <div className="text-xs space-y-0.5">
-                  <span className="font-bold text-white block">{cms.about_cert_2_title || 'ISO 9001:2015 Standards'}</span>
-                  <span className="text-slate-400">{cms.about_cert_2_desc || 'All CCD cameras and air manifolds compliant with global safety.'}</span>
+                  <span className="font-bold text-slate-900 block">{cms.about_cert_2_title || 'ISO 9001:2015 Standards'}</span>
+                  <span className="text-slate-500">{cms.about_cert_2_desc || 'All CCD cameras and air manifolds compliant with global safety.'}</span>
                 </div>
               </div>
             </div>
 
-            <div className="text-[10px] uppercase font-mono text-slate-500 pt-4">
+            <div className="text-[10px] uppercase font-mono text-slate-400 pt-4">
               TECHSOL International Corp
             </div>
           </div>
@@ -262,8 +263,8 @@ export default function AboutPage() {
 
           {/* Vision Card */}
           <div className="bg-white border border-slate-200 p-6 sm:p-10 space-y-4 hover:border-slate-800 transition-colors duration-200 rounded-none shadow-xs">
-            <div className="p-3 bg-slate-900 text-white w-fit">
-              <Eye className="h-6 w-6 text-amber-500" />
+            <div className="p-3 bg-slate-100 text-slate-800 w-fit rounded-lg border border-slate-200">
+              <Eye className="h-6 w-6 text-amber-600" />
             </div>
             <h3 className="text-sm font-bold uppercase tracking-widest text-slate-900 font-mono">
               Our Vision
@@ -275,104 +276,177 @@ export default function AboutPage() {
 
         </div>
 
-        {/* REPLACEMENT 1: INDUSTRIES WE SERVE ACCROSS NEPAL (Bento Cards with Images) */}
+        {/* REPLACEMENT 1: INDUSTRIES WE SERVE ACROSS NEPAL (Flawless, High-Fidelity Cards) */}
         <div className="border-t border-slate-200 pt-16 space-y-12" id="about-industries-section">
-          <div className="text-center md:text-left space-y-3 max-w-xl">
-            <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-amber-600 font-mono block">
-              Market Operations
-            </span>
-            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 uppercase">
-              Industries We Serve Across Nepal
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-500 font-sans leading-relaxed">
-              We supply specialized ingredients, customized powder formulations, and automated hardware setups across all key industrial corridors.
-            </p>
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-2">
+            <div className="space-y-3 max-w-xl">
+              <div className="inline-flex items-center gap-2 bg-amber-100/80 text-amber-800 text-[11px] font-bold uppercase tracking-[0.25em] font-mono px-3 py-1 rounded-full border border-amber-200/80">
+                <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                Market Operations
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-black text-slate-900 uppercase">
+                Industries We Serve Across Nepal
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-600 font-sans leading-relaxed">
+                We supply specialized ingredients, customized powder formulations, and automated hardware setups across all key industrial corridors.
+              </p>
+            </div>
+
+            <div className="shrink-0 flex items-center gap-2">
+              <Link
+                href="/products"
+                className="min-h-[44px] inline-flex items-center gap-2 px-5 py-2.5 bg-white hover:bg-slate-100 text-slate-900 border border-slate-300 font-semibold text-xs tracking-wider uppercase rounded-xl transition-all shadow-xs"
+              >
+                <span>Browse Catalogue</span>
+                <ArrowRight className="h-4 w-4 text-amber-600" />
+              </Link>
+            </div>
           </div>
 
-          {/* Bento card set for About page */}
+          {/* Grid Layout with Full-Fidelity Images & Clean Content Bodies */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             
             {/* Bakery Card */}
-            <div className="relative h-[280px] bg-slate-950 border border-slate-200 overflow-hidden group flex flex-col justify-end p-6">
-              <div className="absolute inset-0">
+            <div className="bg-white border border-slate-200 rounded-2xl shadow-xs hover:shadow-xl hover:border-amber-400 transition-all duration-300 flex flex-col overflow-hidden group">
+              <div className="relative h-48 sm:h-52 w-full overflow-hidden bg-slate-100">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img 
-                  src="https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&q=80&w=400"
-                  alt="Bakery Industry"
-                  className="w-full h-full object-cover opacity-40 group-hover:opacity-75 transition-all duration-500 group-hover:scale-105"
+                  src="https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&q=80&w=600"
+                  alt="Bakery Industry Nepal"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
                   referrerPolicy="no-referrer"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent"></div>
+                <div className="absolute top-3 left-3 bg-white/95 backdrop-blur-md px-3 py-1 rounded-full border border-slate-200/80 shadow-xs flex items-center gap-1.5">
+                  <span className="text-[10px] font-mono font-bold text-amber-600">01</span>
+                  <span className="text-[10px] font-mono font-bold text-slate-900 uppercase">Bakery</span>
+                </div>
+                <div className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/95 backdrop-blur-md text-amber-600 flex items-center justify-center shadow-xs border border-slate-200/80">
+                  <Cookie className="h-4 w-4" />
+                </div>
               </div>
-              <div className="relative z-10 space-y-1">
-                <span className="text-[8px] font-mono text-amber-500 font-bold block">01 / BAKERY</span>
-                <h4 className="font-extrabold text-base uppercase text-white tracking-wide">{cms.home_industry_title_1}</h4>
-                <p className="text-[10px] text-slate-300 leading-tight">
-                  Consistent textures, sweet notes, and certified emulsifiers for major biscuit and cake plants.
-                </p>
+              <div className="p-6 flex flex-col justify-between flex-1 space-y-4">
+                <div className="space-y-2">
+                  <h4 className="font-extrabold text-base text-slate-900 tracking-tight group-hover:text-amber-600 transition-colors">
+                    {cms.home_industry_title_1 || 'Bakery & Confectionery'}
+                  </h4>
+                  <p className="text-xs text-slate-600 leading-relaxed font-sans">
+                    Consistent textures, sweet notes, and certified emulsifiers for major biscuit, cookie, and cake plants.
+                  </p>
+                </div>
+                <div className="pt-2 border-t border-slate-100">
+                  <Link href="/products" className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-600 hover:text-amber-700">
+                    <span>View Bakery Solutions</span>
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </Link>
+                </div>
               </div>
             </div>
 
             {/* Beverage Card */}
-            <div className="relative h-[280px] bg-slate-950 border border-slate-200 overflow-hidden group flex flex-col justify-end p-6">
-              <div className="absolute inset-0">
+            <div className="bg-white border border-slate-200 rounded-2xl shadow-xs hover:shadow-xl hover:border-amber-400 transition-all duration-300 flex flex-col overflow-hidden group">
+              <div className="relative h-48 sm:h-52 w-full overflow-hidden bg-slate-100">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img 
-                  src="https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&q=80&w=400"
-                  alt="Beverage Industry"
-                  className="w-full h-full object-cover opacity-40 group-hover:opacity-75 transition-all duration-500 group-hover:scale-105"
+                  src="https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&q=80&w=600"
+                  alt="Beverage Industry Nepal"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
                   referrerPolicy="no-referrer"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent"></div>
+                <div className="absolute top-3 left-3 bg-white/95 backdrop-blur-md px-3 py-1 rounded-full border border-slate-200/80 shadow-xs flex items-center gap-1.5">
+                  <span className="text-[10px] font-mono font-bold text-amber-600">02</span>
+                  <span className="text-[10px] font-mono font-bold text-slate-900 uppercase">Beverages</span>
+                </div>
+                <div className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/95 backdrop-blur-md text-amber-600 flex items-center justify-center shadow-xs border border-slate-200/80">
+                  <CupSoda className="h-4 w-4" />
+                </div>
               </div>
-              <div className="relative z-10 space-y-1">
-                <span className="text-[8px] font-mono text-amber-500 font-bold block">02 / BEVERAGE</span>
-                <h4 className="font-extrabold text-base uppercase text-white tracking-wide">{cms.home_industry_title_2}</h4>
-                <p className="text-[10px] text-slate-300 leading-tight">
-                  Premium heat-stable liquid concentrates, citric profiles, and customized cloudifying agents.
-                </p>
+              <div className="p-6 flex flex-col justify-between flex-1 space-y-4">
+                <div className="space-y-2">
+                  <h4 className="font-extrabold text-base text-slate-900 tracking-tight group-hover:text-amber-600 transition-colors">
+                    {cms.home_industry_title_2 || 'Beverages'}
+                  </h4>
+                  <p className="text-xs text-slate-600 leading-relaxed font-sans">
+                    Premium heat-stable liquid concentrates, citric profiles, and customized cloudifying agents.
+                  </p>
+                </div>
+                <div className="pt-2 border-t border-slate-100">
+                  <Link href="/products" className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-600 hover:text-amber-700">
+                    <span>View Beverage Solutions</span>
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </Link>
+                </div>
               </div>
             </div>
 
             {/* Dairy Card */}
-            <div className="relative h-[280px] bg-slate-950 border border-slate-200 overflow-hidden group flex flex-col justify-end p-6">
-              <div className="absolute inset-0">
+            <div className="bg-white border border-slate-200 rounded-2xl shadow-xs hover:shadow-xl hover:border-amber-400 transition-all duration-300 flex flex-col overflow-hidden group">
+              <div className="relative h-48 sm:h-52 w-full overflow-hidden bg-slate-100">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img 
-                  src="https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&q=80&w=400"
-                  alt="Dairy Industry"
-                  className="w-full h-full object-cover opacity-40 group-hover:opacity-75 transition-all duration-500 group-hover:scale-105"
+                  src="https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&q=80&w=600"
+                  alt="Dairy Industry Nepal"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
                   referrerPolicy="no-referrer"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent"></div>
+                <div className="absolute top-3 left-3 bg-white/95 backdrop-blur-md px-3 py-1 rounded-full border border-slate-200/80 shadow-xs flex items-center gap-1.5">
+                  <span className="text-[10px] font-mono font-bold text-amber-600">03</span>
+                  <span className="text-[10px] font-mono font-bold text-slate-900 uppercase">Dairy</span>
+                </div>
+                <div className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/95 backdrop-blur-md text-amber-600 flex items-center justify-center shadow-xs border border-slate-200/80">
+                  <Milk className="h-4 w-4" />
+                </div>
               </div>
-              <div className="relative z-10 space-y-1">
-                <span className="text-[8px] font-mono text-amber-500 font-bold block">03 / DAIRY</span>
-                <h4 className="font-extrabold text-base uppercase text-white tracking-wide">{cms.home_industry_title_3}</h4>
-                <p className="text-[10px] text-slate-300 leading-tight">
-                  High cold-temp performance flavorings, stabilizer systems, and automated packager setups.
-                </p>
+              <div className="p-6 flex flex-col justify-between flex-1 space-y-4">
+                <div className="space-y-2">
+                  <h4 className="font-extrabold text-base text-slate-900 tracking-tight group-hover:text-amber-600 transition-colors">
+                    {cms.home_industry_title_3 || 'Dairy & Ice Cream'}
+                  </h4>
+                  <p className="text-xs text-slate-600 leading-relaxed font-sans">
+                    High cold-temp performance flavorings, stabilizer systems, and automated packager setups.
+                  </p>
+                </div>
+                <div className="pt-2 border-t border-slate-100">
+                  <Link href="/products" className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-600 hover:text-amber-700">
+                    <span>View Dairy Solutions</span>
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </Link>
+                </div>
               </div>
             </div>
 
             {/* Snacks Card */}
-            <div className="relative h-[280px] bg-slate-950 border border-slate-200 overflow-hidden group flex flex-col justify-end p-6">
-              <div className="absolute inset-0">
+            <div className="bg-white border border-slate-200 rounded-2xl shadow-xs hover:shadow-xl hover:border-amber-400 transition-all duration-300 flex flex-col overflow-hidden group">
+              <div className="relative h-48 sm:h-52 w-full overflow-hidden bg-slate-100">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img 
-                  src="https://images.unsplash.com/photo-1566478989037-eec170784d0b?auto=format&fit=crop&q=80&w=400"
-                  alt="Snacks Industry"
-                  className="w-full h-full object-cover opacity-40 group-hover:opacity-75 transition-all duration-500 group-hover:scale-105"
+                  src="https://images.unsplash.com/photo-1566478989037-eec170784d0b?auto=format&fit=crop&q=80&w=600"
+                  alt="Snacks Industry Nepal"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
                   referrerPolicy="no-referrer"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent"></div>
+                <div className="absolute top-3 left-3 bg-white/95 backdrop-blur-md px-3 py-1 rounded-full border border-slate-200/80 shadow-xs flex items-center gap-1.5">
+                  <span className="text-[10px] font-mono font-bold text-amber-600">04</span>
+                  <span className="text-[10px] font-mono font-bold text-slate-900 uppercase">Snacks</span>
+                </div>
+                <div className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/95 backdrop-blur-md text-amber-600 flex items-center justify-center shadow-xs border border-slate-200/80">
+                  <Flame className="h-4 w-4" />
+                </div>
               </div>
-              <div className="relative z-10 space-y-1">
-                <span className="text-[8px] font-mono text-amber-500 font-bold block">04 / SNACKS</span>
-                <h4 className="font-extrabold text-base uppercase text-white tracking-wide">{cms.home_industry_title_4}</h4>
-                <p className="text-[10px] text-slate-300 leading-tight">
-                  Bold seasoning salts, custom spice compound powders, and automated optical food sorting.
-                </p>
+              <div className="p-6 flex flex-col justify-between flex-1 space-y-4">
+                <div className="space-y-2">
+                  <h4 className="font-extrabold text-base text-slate-900 tracking-tight group-hover:text-amber-600 transition-colors">
+                    {cms.home_industry_title_4 || 'Snacks & Namkeen'}
+                  </h4>
+                  <p className="text-xs text-slate-600 leading-relaxed font-sans">
+                    Bold seasoning salts, custom spice compound powders, and automated optical food sorting.
+                  </p>
+                </div>
+                <div className="pt-2 border-t border-slate-100">
+                  <Link href="/products" className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-600 hover:text-amber-700">
+                    <span>View Snack Seasonings</span>
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </Link>
+                </div>
               </div>
             </div>
 
@@ -438,26 +512,26 @@ export default function AboutPage() {
                   </div>
                 </div>
 
-                {/* Navigation */}
+                {/* Navigation (Minimum 44x44px touch targets) */}
                 <div className="flex items-center gap-2">
                   <button
                     onClick={handlePrevTestimonial}
-                    className="p-2 bg-slate-50 border border-slate-200 text-slate-700 hover:text-amber-600 hover:border-slate-800 transition-all cursor-pointer"
+                    className="min-w-[44px] min-h-[44px] flex items-center justify-center bg-white border border-slate-200 text-slate-800 hover:text-amber-600 hover:border-amber-500 rounded-lg shadow-xs transition-all cursor-pointer"
                     aria-label="Previous appraisal"
                     id="about-testimonial-prev"
                   >
-                    <ArrowLeft className="h-4 w-4" />
+                    <ArrowLeft className="h-4.5 w-4.5" />
                   </button>
-                  <span className="text-[11px] font-mono text-slate-400 min-w-[40px] text-center select-none">
+                  <span className="text-[11px] font-mono font-semibold text-slate-500 min-w-[40px] text-center select-none">
                     {activeTestimonialIndex + 1} / {testimonials.length}
                   </span>
                   <button
                     onClick={handleNextTestimonial}
-                    className="p-2 bg-slate-50 border border-slate-200 text-slate-700 hover:text-amber-600 hover:border-slate-800 transition-all cursor-pointer"
+                    className="min-w-[44px] min-h-[44px] flex items-center justify-center bg-white border border-slate-200 text-slate-800 hover:text-amber-600 hover:border-amber-500 rounded-lg shadow-xs transition-all cursor-pointer"
                     aria-label="Next appraisal"
                     id="about-testimonial-next"
                   >
-                    <ArrowRight className="h-4 w-4" />
+                    <ArrowRight className="h-4.5 w-4.5" />
                   </button>
                 </div>
               </div>

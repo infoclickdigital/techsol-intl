@@ -155,38 +155,31 @@ export default function BlogsPage() {
               </div>
             </div>
             
-            <div className="lg:col-span-4 bg-slate-900 text-white p-6 sm:p-10 lg:p-12 flex flex-col justify-between border-t lg:border-t-0 lg:border-l border-slate-200 relative min-h-[220px]">
-              {/* Background image preview if available, otherwise vector background */}
+            <div className="lg:col-span-4 bg-slate-50 text-slate-900 p-6 sm:p-10 lg:p-12 flex flex-col justify-between border-t lg:border-t-0 lg:border-l border-slate-200 relative min-h-[220px]">
+              {/* Background image preview if available */}
               {featuredBlog.image_url ? (
                 <div className="absolute inset-0">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img 
                     src={featuredBlog.image_url} 
                     alt={featuredBlog.title}
-                    className="w-full h-full object-cover opacity-20"
+                    className="w-full h-full object-cover opacity-10"
                     referrerPolicy="no-referrer"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/70 to-transparent"></div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-50 via-slate-50/90 to-transparent"></div>
                 </div>
-              ) : (
-                <div className="absolute inset-0 opacity-[0.10] select-none pointer-events-none">
-                  <svg viewBox="0 0 100 100" className="w-full h-full" fill="none" stroke="white" strokeWidth="1">
-                    <circle cx="50" cy="50" r="40" />
-                    <path d="M10 50 H90 M50 10 V90" />
-                  </svg>
-                </div>
-              )}
+              ) : null}
               
-              <h3 className="text-xs font-bold uppercase tracking-widest text-amber-500 font-mono z-10">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 font-mono z-10">
                 Key Focus Areas
               </h3>
-              <ul className="space-y-3 pt-6 lg:pt-0 font-semibold text-xs text-slate-350 z-10">
-                <li className="flex items-center gap-2"><BookOpen className="h-3.5 w-3.5 text-amber-500" /> Pneumatic Ejector Lifespans</li>
-                <li className="flex items-center gap-2"><BookOpen className="h-3.5 w-3.5 text-amber-500" /> Roll fluting patterns for mills</li>
-                <li className="flex items-center gap-2"><BookOpen className="h-3.5 w-3.5 text-amber-500" /> Modbus telemetry integrations</li>
+              <ul className="space-y-3 pt-6 lg:pt-0 font-medium text-xs text-slate-700 z-10">
+                <li className="flex items-center gap-2"><BookOpen className="h-4 w-4 text-amber-600 shrink-0" /> Pneumatic Ejector Lifespans</li>
+                <li className="flex items-center gap-2"><BookOpen className="h-4 w-4 text-amber-600 shrink-0" /> Roll fluting patterns for mills</li>
+                <li className="flex items-center gap-2"><BookOpen className="h-4 w-4 text-amber-600 shrink-0" /> Modbus telemetry integrations</li>
               </ul>
-              <div className="text-[10px] font-mono text-slate-500 uppercase pt-6 lg:pt-0 z-10">
-                Docs Dept @ Techsol
+              <div className="text-[10px] font-mono text-slate-500 uppercase pt-6 lg:pt-0 z-10 font-semibold">
+                Research Desk @ Techsol
               </div>
             </div>
           </div>
@@ -244,14 +237,14 @@ export default function BlogsPage() {
                     </p>
                   </div>
 
-                  <div className="mt-8 pt-4 border-t border-slate-100 flex flex-col gap-4">
+                  <div className="mt-8 pt-4 border-t border-slate-100 flex flex-col gap-2">
                     <div className="flex items-center justify-between text-[10px] font-mono text-slate-400">
                       <span>{art.date}</span>
                       <span>{art.read_time}</span>
                     </div>
 
                     <div className="flex items-center justify-between gap-2">
-                      <Link href={`/blogs/${art.id}`} className="text-xs font-bold text-amber-600 hover:text-slate-900 transition-colors flex items-center gap-1 select-none cursor-pointer w-fit">
+                      <Link href={`/blogs/${art.id}`} className="min-h-[44px] flex items-center text-xs font-bold text-amber-600 hover:text-slate-900 transition-colors gap-1 select-none cursor-pointer w-fit">
                         <span>Read Article</span>
                         <ArrowRight className="h-3.5 w-3.5" />
                       </Link>

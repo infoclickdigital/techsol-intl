@@ -6,12 +6,10 @@ import {
   MessageSquare, 
   X, 
   Send, 
-  Flame, 
-  Sparkles, 
-  ArrowUpRight,
+  ArrowRight,
   ShieldCheck,
-  Zap,
-  Info
+  Info,
+  RotateCcw
 } from 'lucide-react';
 
 interface ChatMessage {
@@ -21,7 +19,6 @@ interface ChatMessage {
 
 export default function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);
-  const [showWelcomeBubble, setShowWelcomeBubble] = useState(false);
   
   // User Registration State
   const [userName, setUserName] = useState('');
@@ -38,7 +35,7 @@ export default function Chatbot() {
     'Food flavour samples?',
     'Custom flavour creation?',
     'Functional ingredients list?',
-    'Machine consulting services?'
+    'Machinery consulting?'
   ];
 
   // Load Cached User Info if it exists
@@ -56,15 +53,15 @@ export default function Chatbot() {
           setMessages([
             { 
               role: 'assistant', 
-              text: 'Namaste! Welcome to Techsol International. 🧪 We supply premium food flavours, functional ingredients, and expert machine consulting services across Nepal. How can I assist you with your food or beverage production requirements today?' 
+              text: 'Namaste! Welcome to Techsol International. We supply premium food flavours, functional ingredients, and machinery consulting services across Nepal. How can I help you today?' 
             },
             {
               role: 'user',
-              text: `My contact details:\n👤 Name: ${parsed.name}\n📞 Phone: ${parsed.phone}\n📍 Address: ${parsed.address}`
+              text: `My contact details:\nName: ${parsed.name}\nPhone: ${parsed.phone}\nAddress: ${parsed.address}`
             },
             {
               role: 'assistant',
-              text: `Dhanyabad (Thank you), ${parsed.name}! I have linked your profile to this session. Let's begin our conversation. How can I support your project today?`
+              text: `Thank you, ${parsed.name}! How can we support your food or beverage production today?`
             }
           ]);
           return;
@@ -78,20 +75,10 @@ export default function Chatbot() {
     setMessages([
       { 
         role: 'assistant', 
-        text: 'Namaste! Welcome to Techsol International. 🧪 We supply premium food flavours, functional ingredients, and expert machine consulting services across Nepal. How can I assist you with your food or beverage production requirements today?' 
+        text: 'Namaste! Welcome to Techsol International. We supply premium food flavours, functional ingredients, and machinery consulting across Nepal. How can I assist you today?' 
       }
     ]);
   }, []);
-
-  useEffect(() => {
-    // Show welcome greeting bubble after 1.5 seconds if chatbot is closed
-    const timer = setTimeout(() => {
-      if (!isOpen) {
-        setShowWelcomeBubble(true);
-      }
-    }, 1500);
-    return () => clearTimeout(timer);
-  }, [isOpen]);
 
   useEffect(() => {
     // Scroll to bottom of message list on new stream
@@ -116,21 +103,21 @@ export default function Chatbot() {
     const initialMessages: ChatMessage[] = [
       { 
         role: 'assistant', 
-        text: 'Namaste! Welcome to Techsol International. 🧪 We supply premium food flavours, functional ingredients, and expert machine consulting services across Nepal. How can I assist you with your food or beverage production requirements today?' 
+        text: 'Namaste! Welcome to Techsol International. We supply premium food flavours, functional ingredients, and machinery consulting across Nepal. How can I assist you today?' 
       },
       {
         role: 'user',
-        text: `My contact details:\n👤 Name: ${contact.name}\n📞 Phone: ${contact.phone}\n📍 Address: ${contact.address}`
+        text: `My contact details:\nName: ${contact.name}\nPhone: ${contact.phone}\nAddress: ${contact.address}`
       },
       {
         role: 'assistant',
-        text: `Dhanyabad (Thank you), ${contact.name}! I have saved your details in this chat. How can I support your production line or flavour requirements today?`
+        text: `Thank you, ${contact.name}! I have noted your details. How can I support your project or flavour requirements today?`
       }
     ];
 
     setMessages(initialMessages);
 
-    // Track lead registration instantly in our database
+    // Track lead registration in database
     try {
       await fetch('/api/submit-lead', {
         method: 'POST',
@@ -140,9 +127,9 @@ export default function Chatbot() {
           name: contact.name,
           phone: contact.phone,
           address: contact.address,
-          industry: 'Industrial Brand Client',
+          industry: 'Industrial Client',
           machineInquiry: 'Chatbot intake filled',
-          description: `User verified details & initiated AI agent chat portal.`,
+          description: `User connected through AI Adviser chat.`,
           chatHistory: initialMessages
         })
       });
@@ -158,7 +145,6 @@ export default function Chatbot() {
     setMessages(prev => [...prev, { role: 'user', text: userMsg }]);
     setInputText('');
     setLoading(true);
-    setShowWelcomeBubble(false);
 
     try {
       const res = await fetch('/api/chat', {
@@ -172,34 +158,32 @@ export default function Chatbot() {
         const updatedMsgs: ChatMessage[] = [...messages, { role: 'user', text: userMsg }, { role: 'assistant', text: data.text }];
         setMessages(updatedMsgs);
 
-        // Dynamic CRM lead transaction logging to PostgreSQL
         await fetch('/api/submit-lead', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             type: 'chat',
-            name: userName || 'Registered Advisory Client',
+            name: userName || 'Advisory Client',
             phone: userPhone || 'Registered',
-            address: userAddress || 'Registered Portal',
-            industry: 'Interactive Assistant Query',
-            machineInquiry: 'Chat Conversation Stream',
+            address: userAddress || 'Nepal',
+            industry: 'Assistant Query',
+            machineInquiry: 'Chat Conversation',
             description: `Query: "${userMsg}". Response: "${data.text.substring(0, 100)}"`,
             chatHistory: updatedMsgs
           })
         });
       } else {
-        setMessages(prev => [...prev, { role: 'assistant', text: 'Sorry, I am having trouble connecting right now. Let me coordinate with our desk at Tinkune sales office.' }]);
+        setMessages(prev => [...prev, { role: 'assistant', text: 'Sorry, I am having trouble connecting right now. Please call our team directly at 9851218867 or email contact@techsol.com.np.' }]);
       }
     } catch (err) {
       console.error(err);
-      setMessages(prev => [...prev, { role: 'assistant', text: 'A network interruption occurred. Please reach our engineers at info@techsol.international.' }]);
+      setMessages(prev => [...prev, { role: 'assistant', text: 'A network interruption occurred. Please reach our team at 9851218867 or contact@techsol.com.np.' }]);
     } finally {
       setLoading(false);
     }
   };
 
   const clearChatHistory = () => {
-    // Clear registration and chat history so they can change name/re-register if needed
     localStorage.removeItem('techsol_chat_contact');
     setIsRegistered(false);
     setUserName('');
@@ -208,69 +192,31 @@ export default function Chatbot() {
     setMessages([
       { 
         role: 'assistant', 
-        text: 'Namaste! Welcome to Techsol International. 🧪 We supply premium food flavours, functional ingredients, and expert machine consulting services across Nepal. How can I assist you with your food or beverage production requirements today?' 
+        text: 'Namaste! Welcome to Techsol International. We supply premium food flavours, functional ingredients, and machinery consulting across Nepal. How can I assist you today?' 
       }
     ]);
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-[100] font-sans text-slate-800 antialiased select-text">
+    <div className="fixed bottom-6 right-6 z-[100] font-sans text-slate-900 antialiased select-text">
       
-      {/* 1. Closed State Welcoming Speech Bubble */}
-      <AnimatePresence>
-        {showWelcomeBubble && !isOpen && (
-          <motion.div 
-            initial={{ opacity: 0, y: 15, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 10, scale: 0.95 }}
-            className="absolute bottom-16 right-2 w-72 !max-w-none bg-slate-950 text-white p-4 shadow-2xl border border-slate-800 text-xs rounded-none mb-3"
-          >
-            <div className="flex justify-between items-start mb-2">
-              <span className="flex items-center gap-1.5 font-mono text-[9px] text-amber-500 uppercase font-black">
-                <Sparkles className="h-3 w-3 animate-pulse" />
-                <span>Techsol Expert Advisor</span>
-              </span>
-              <button 
-                onClick={() => setShowWelcomeBubble(false)}
-                className="text-slate-450 hover:text-white cursor-pointer"
-                title="Dismiss greeting"
-              >
-                <X className="h-3 w-3" />
-              </button>
-            </div>
-            <p className="leading-relaxed text-slate-200">
-              Need premium powder or liquid food flavours, custom spice seasonings, or food production line layouts? Let&apos;s brainstorm your formulation!
-            </p>
-            <div className="mt-2.5 flex justify-end">
-              <button 
-                onClick={() => { setIsOpen(true); setShowWelcomeBubble(false); }}
-                className="text-[9px] font-mono tracking-wider text-amber-500 hover:text-white flex items-center gap-1 uppercase font-black cursor-pointer"
-              >
-                <span>Initialize Advisor</span>
-                <ArrowUpRight className="h-3 w-3" />
-              </button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* 2. Floating Base Button */}
+      {/* Floating Action Button (Iconic Modern Chat Bot FAB) */}
       <motion.button
         id="chatbot-floating-toggle"
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        onClick={() => { setIsOpen(!isOpen); setShowWelcomeBubble(false); }}
-        className="w-14 h-14 bg-slate-950 hover:bg-amber-600 text-white rounded-none shadow-2xl border border-slate-800 flex items-center justify-center transition-colors duration-200 cursor-pointer relative"
-        title="Open Industrial Expert AI Chat"
-        aria-label="Toggle Industrial Advisor"
+        whileHover={{ scale: 1.06 }}
+        whileTap={{ scale: 0.94 }}
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-14 h-14 bg-gradient-to-tr from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-white rounded-full shadow-xl shadow-amber-600/30 hover:shadow-2xl hover:shadow-amber-600/40 border border-amber-400/30 flex items-center justify-center cursor-pointer transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 relative"
+        title={isOpen ? "Close chat" : "Chat with us"}
+        aria-label={isOpen ? "Close chat" : "Open chat"}
       >
         <AnimatePresence mode="wait">
           {isOpen ? (
             <motion.div
               key="close-icon"
-              initial={{ rotate: -45, opacity: 0 }}
+              initial={{ rotate: -90, opacity: 0 }}
               animate={{ rotate: 0, opacity: 1 }}
-              exit={{ rotate: 45, opacity: 0 }}
+              exit={{ rotate: 90, opacity: 0 }}
               transition={{ duration: 0.15 }}
             >
               <X className="h-6 w-6 text-white" />
@@ -278,81 +224,94 @@ export default function Chatbot() {
           ) : (
             <motion.div
               key="chat-icon"
-              initial={{ rotate: 45, opacity: 0 }}
+              initial={{ rotate: 90, opacity: 0 }}
               animate={{ rotate: 0, opacity: 1 }}
-              exit={{ rotate: -45, opacity: 0 }}
+              exit={{ rotate: -90, opacity: 0 }}
               transition={{ duration: 0.15 }}
-              className="relative"
+              className="relative flex items-center justify-center"
             >
-              <MessageSquare className="h-6 w-6 text-white animate-none" />
-              <span className="absolute -top-1.5 -right-1.5 w-3 h-3 bg-amber-500 border border-slate-950 rounded-none animate-ping"></span>
-              <span className="absolute -top-1.5 -right-1.5 w-3 h-3 bg-amber-500 border border-slate-950 rounded-none"></span>
+              <MessageSquare className="h-6 w-6 text-white fill-white/20" />
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* Live Status Indicator Dot on corner when closed */}
+        {!isOpen && (
+          <span className="absolute -top-0.5 -right-0.5 flex h-3.5 w-3.5">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#22C55E] opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-[#22C55E] ring-2 ring-white"></span>
+          </span>
+        )}
       </motion.button>
 
-      {/* 3. Main Expanded Chat Interface */}
+      {/* Main Expanded Chat Interface (Crisp Light Theme) */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, y: 30, scale: 0.95 }}
+            initial={{ opacity: 0, y: 20, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 30, scale: 0.95 }}
+            exit={{ opacity: 0, y: 20, scale: 0.98 }}
             transition={{ duration: 0.2 }}
-            className="fixed !max-w-none bottom-24 left-4 right-4 sm:absolute sm:bottom-18 sm:right-0 sm:left-auto w-auto sm:w-[400px] h-[72vh] sm:h-[560px] bg-slate-950 border border-slate-800 shadow-2xl flex flex-col justify-between overflow-hidden z-[101]"
+            className="fixed !max-w-none bottom-22 left-4 right-4 sm:absolute sm:bottom-18 sm:right-0 sm:left-auto w-auto sm:w-[410px] h-[75vh] sm:h-[580px] bg-white border border-slate-200 rounded-2xl shadow-2xl flex flex-col justify-between overflow-hidden z-[101]"
           >
             
             {/* Header Banner */}
-            <div className="bg-slate-950 border-b border-slate-800 p-4 shrink-0 flex items-center justify-between">
+            <div className="bg-slate-50 border-b border-slate-200 p-4 shrink-0 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="bg-amber-600/10 p-2 border border-amber-600/20 text-amber-500">
-                  <Flame className="h-5 w-5 animate-pulse" />
+                <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center text-amber-700 border border-amber-200/60 shrink-0">
+                  <MessageSquare className="h-5 w-5" />
                 </div>
                 <div>
-                  <h3 className="text-xs font-mono tracking-widest text-white uppercase font-bold">
-                    Techsol Advisor
-                  </h3>
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse inline-block"></span>
-                    <span className="text-[9px] text-slate-400 font-mono uppercase">Ingredients & Machinery Support</span>
+                  <div className="flex items-center gap-2">
+                    {/* Subtle green pulsing live-status indicator dot */}
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#22C55E] opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-[#22C55E]"></span>
+                    </span>
+                    <h3 className="text-sm font-bold text-slate-900 leading-tight">
+                      Techsol AI Assistant
+                    </h3>
                   </div>
+                  <span className="text-[11px] text-slate-500 font-normal">
+                    Flavours, Ingredients & Machinery Help
+                  </span>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1">
                 <button 
                   onClick={clearChatHistory}
-                  className="text-[9px] font-mono text-slate-500 hover:text-white uppercase transition-colors px-2 py-1 bg-slate-900 border border-slate-800 cursor-pointer"
-                  title="Clear conversation logs"
+                  className="min-h-[44px] min-w-[44px] flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 rounded-lg transition-colors cursor-pointer"
+                  title="Clear conversation"
+                  aria-label="Clear conversation"
                 >
-                  Reset Tab
+                  <RotateCcw className="h-4 w-4" />
                 </button>
                 <button
                   onClick={() => setIsOpen(false)}
-                  className="text-slate-400 hover:text-white cursor-pointer"
-                  aria-label="Hide panel"
+                  className="min-h-[44px] min-w-[44px] flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 rounded-lg transition-colors cursor-pointer"
+                  aria-label="Close chat"
                 >
-                  <X className="h-4 w-4" />
+                  <X className="h-5 w-5" />
                 </button>
               </div>
             </div>
 
             {/* Conditional Intake Form / Conversation Panel */}
             {!isRegistered ? (
-              <form onSubmit={handleRegister} className="flex-1 overflow-y-auto p-5 pb-8 space-y-4 bg-slate-950 flex flex-col justify-center">
-                <div className="space-y-1.5 text-center mb-1">
-                  <h4 className="text-amber-500 font-mono text-[9px] tracking-widest uppercase font-black">
-                     Industrial Advisory Portal
+              <form onSubmit={handleRegister} className="flex-1 overflow-y-auto p-6 space-y-4 bg-white flex flex-col justify-center">
+                <div className="space-y-1.5 text-center mb-2">
+                  <h4 className="text-sm font-bold text-slate-900">
+                    Welcome! How can we help?
                   </h4>
-                  <p className="text-slate-300 text-[11px] leading-relaxed">
-                    Please share your details to activate Techsol&apos;s AI consultation.
+                  <p className="text-slate-600 text-xs leading-relaxed max-w-xs mx-auto">
+                    Please provide your contact details so our advisers can best assist your food production requirements.
                   </p>
                 </div>
 
-                <div className="space-y-3">
+                <div className="space-y-3.5">
                   <div className="space-y-1">
-                    <label className="text-[9px] font-mono uppercase text-slate-400 font-bold block">
+                    <label className="text-xs font-semibold text-slate-700 block">
                       Full Name *
                     </label>
                     <input
@@ -360,13 +319,13 @@ export default function Chatbot() {
                       required
                       value={userName}
                       onChange={(e) => setUserName(e.target.value)}
-                      placeholder="e.g., Sunil Shrestha"
-                      className="w-full bg-slate-900 border border-slate-800 focus:border-amber-500 rounded-none text-xs text-white px-3 py-2.5 outline-none placeholder-slate-600 transition-colors"
+                      placeholder="e.g. Sunil Shrestha"
+                      className="w-full bg-slate-50 border border-slate-200 focus:border-amber-500 focus:bg-white rounded-lg text-sm text-slate-900 px-3.5 min-h-[44px] outline-none placeholder-slate-400 transition-colors"
                     />
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-[9px] font-mono uppercase text-slate-400 font-bold block">
+                    <label className="text-xs font-semibold text-slate-700 block">
                       Phone Number *
                     </label>
                     <input
@@ -374,32 +333,32 @@ export default function Chatbot() {
                       required
                       value={userPhone}
                       onChange={(e) => setUserPhone(e.target.value)}
-                      placeholder="e.g., 98XXXXXXXX"
-                      className="w-full bg-slate-900 border border-slate-800 focus:border-amber-500 rounded-none text-xs text-white px-3 py-2.5 outline-none placeholder-slate-600 transition-colors"
+                      placeholder="e.g. 98XXXXXXXX"
+                      className="w-full bg-slate-50 border border-slate-200 focus:border-amber-500 focus:bg-white rounded-lg text-sm text-slate-900 px-3.5 min-h-[44px] outline-none placeholder-slate-400 transition-colors"
                     />
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-[9px] font-mono uppercase text-slate-400 font-bold block">
-                      Factory / Office Address *
+                    <label className="text-xs font-semibold text-slate-700 block">
+                      Factory or Office Location *
                     </label>
                     <input
                       type="text"
                       required
                       value={userAddress}
                       onChange={(e) => setUserAddress(e.target.value)}
-                      placeholder="e.g., Tinkune, Kathmandu"
-                      className="w-full bg-slate-900 border border-slate-800 focus:border-amber-500 rounded-none text-xs text-white px-3 py-2.5 outline-none placeholder-slate-600 transition-colors"
+                      placeholder="e.g. Biratnagar or Kathmandu"
+                      className="w-full bg-slate-50 border border-slate-200 focus:border-amber-500 focus:bg-white rounded-lg text-sm text-slate-900 px-3.5 min-h-[44px] outline-none placeholder-slate-400 transition-colors"
                     />
                   </div>
                 </div>
 
                 <button
                   type="submit"
-                  className="mt-2 bg-amber-600 hover:bg-amber-500 text-white font-mono uppercase text-[10px] tracking-wider py-3 px-4 rounded-none transition-all duration-150 flex items-center justify-center gap-1.5 cursor-pointer font-bold shrink-0 shadow-lg"
+                  className="mt-3 w-full min-h-[44px] bg-slate-900 hover:bg-amber-600 text-white text-xs font-bold py-3 px-4 rounded-lg transition-colors duration-150 flex items-center justify-center gap-2 cursor-pointer shadow-sm"
                 >
-                  <span>Start Live Session</span>
-                  <ArrowUpRight className="h-3 w-3" />
+                  <span>Start Conversation</span>
+                  <ArrowRight className="h-4 w-4" />
                 </button>
               </form>
             ) : (
@@ -407,14 +366,14 @@ export default function Chatbot() {
                 {/* Chat Body & Scroll Canvas */}
                 <div 
                   ref={scrollRef}
-                  className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-950 select-text scrollbar-thin scrollbar-thumb-slate-800"
+                  className="flex-1 overflow-y-auto p-4 space-y-3.5 bg-slate-50 select-text"
                 >
                   
                   {/* Informative Label */}
-                  <div className="bg-slate-900 border border-slate-800 p-2.5 rounded-none flex gap-2 w-full text-[10px] text-slate-400 leading-normal">
-                    <Info className="h-3.5 w-3.5 text-amber-500 shrink-0 mt-0.5" />
+                  <div className="bg-amber-50 border border-amber-200/80 p-3 rounded-xl flex gap-2.5 w-full text-xs text-amber-900 leading-relaxed">
+                    <Info className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
                     <p>
-                      Ask us about specialized bakery, beverage, beverage powder, dairy components, savoury taste agents, or production line consulting.
+                      Ask us about bakery flavours, beverage powders, dairy compounds, savoury seasonings, or plant equipment consulting.
                     </p>
                   </div>
 
@@ -423,10 +382,10 @@ export default function Chatbot() {
                       key={index} 
                       className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                     >
-                      <div className={`max-w-[85%] p-3 text-xs leading-relaxed rounded-md ${
+                      <div className={`max-w-[85%] p-3.5 text-xs sm:text-sm leading-relaxed rounded-2xl shadow-xs ${
                         msg.role === 'user' 
-                          ? 'bg-amber-600 text-white rounded-br-none ml-6 font-normal selection:bg-slate-950' 
-                          : 'bg-slate-900 text-slate-100 border border-slate-800 rounded-bl-none mr-6 select-text font-normal'
+                          ? 'bg-slate-900 text-white rounded-br-none ml-6 font-normal' 
+                          : 'bg-white text-slate-900 border border-slate-200 rounded-bl-none mr-6 font-normal'
                       }`}>
                         {msg.text}
                       </div>
@@ -436,10 +395,10 @@ export default function Chatbot() {
                   {/* Bot Loading Dots */}
                   {loading && (
                     <div className="flex justify-start">
-                      <div className="bg-slate-900 border border-slate-800 p-3 rounded-none flex items-center gap-1.5">
-                        <span className="w-1.5 h-1.5 bg-amber-500 rounded-none animate-bounce" style={{ animationDelay: '0ms' }}></span>
-                        <span className="w-1.5 h-1.5 bg-amber-500 rounded-none animate-bounce" style={{ animationDelay: '150ms' }}></span>
-                        <span className="w-1.5 h-1.5 bg-amber-500 rounded-none animate-bounce" style={{ animationDelay: '300ms' }}></span>
+                      <div className="bg-white border border-slate-200 p-3.5 rounded-2xl rounded-bl-none flex items-center gap-1.5 shadow-xs">
+                        <span className="w-2 h-2 bg-amber-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
+                        <span className="w-2 h-2 bg-amber-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
+                        <span className="w-2 h-2 bg-amber-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
                       </div>
                     </div>
                   )}
@@ -447,16 +406,16 @@ export default function Chatbot() {
 
                 {/* Selection suggestions */}
                 {messages.length === 3 && !loading && (
-                  <div className="px-4 pb-2.5 shrink-0">
-                    <span className="text-[8px] font-mono uppercase tracking-wider text-slate-500 block mb-1.5">
-                      Suggested inquiries:
+                  <div className="px-4 py-2 bg-white border-t border-slate-100 shrink-0">
+                    <span className="text-[11px] font-semibold text-slate-500 block mb-1.5">
+                      Suggested questions:
                     </span>
                     <div className="flex flex-wrap gap-1.5">
                       {suggestedQuestions.map((q, idx) => (
                         <button
                           key={idx}
                           onClick={() => handleSendMessage(q)}
-                          className="text-[10px] font-mono text-slate-400 hover:text-amber-500 bg-slate-900 hover:bg-slate-850 border border-slate-800 hover:border-amber-500 px-2 py-1 transition-all duration-150 cursor-pointer text-left"
+                          className="min-h-[44px] text-xs text-slate-700 hover:text-amber-700 bg-slate-50 hover:bg-amber-50 border border-slate-200 hover:border-amber-300 px-3 py-2 rounded-lg transition-colors cursor-pointer text-left"
                         >
                           {q}
                         </button>
@@ -468,22 +427,22 @@ export default function Chatbot() {
                 {/* Chat Input Dock */}
                 <form 
                   onSubmit={(e) => { e.preventDefault(); handleSendMessage(inputText); }}
-                  className="bg-slate-950 border-t border-slate-850 p-3.5 flex gap-2 shrink-0 items-center"
+                  className="bg-white border-t border-slate-200 p-3 flex gap-2 shrink-0 items-center"
                 >
                   <input
                     type="text"
                     required
                     value={inputText}
                     onChange={(e) => setInputText(e.target.value)}
-                    placeholder="Message Advisor..."
-                    className="flex-1 bg-slate-900 border border-slate-800 rounded-none text-xs text-white px-3.5 py-3.5 outline-none focus:border-amber-500 placeholder-slate-500"
+                    placeholder="Type your message here..."
+                    className="flex-1 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-900 px-3.5 min-h-[44px] outline-none focus:border-amber-500 focus:bg-white placeholder-slate-400"
                     disabled={loading}
                   />
                   <button
                     type="submit"
                     disabled={!inputText.trim() || loading}
-                    className="bg-amber-600 hover:bg-amber-500 disabled:bg-slate-900 text-white disabled:text-slate-650 p-3.5 rounded-none transition-colors duration-150 cursor-pointer"
-                    aria-label="Send query"
+                    className="min-h-[44px] min-w-[44px] bg-amber-600 hover:bg-amber-500 disabled:bg-slate-200 text-white disabled:text-slate-400 rounded-lg flex items-center justify-center transition-colors cursor-pointer shrink-0"
+                    aria-label="Send message"
                   >
                     <Send className="h-4 w-4" />
                   </button>
@@ -492,9 +451,9 @@ export default function Chatbot() {
             )}
 
             {/* Bottom Certification Info */}
-            <div className="bg-slate-900 border-t border-slate-850 py-1.5 px-4 text-center flex items-center justify-center gap-1.5 select-none font-mono text-[8px] text-slate-500 uppercase">
-              <ShieldCheck className="h-3 w-3 text-emerald-500" />
-              <span>Standard Food-Grade Certification Support</span>
+            <div className="bg-slate-50 border-t border-slate-200 py-2 px-4 text-center flex items-center justify-center gap-1.5 select-none text-[11px] text-slate-500">
+              <ShieldCheck className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+              <span>Direct Support from Techsol International</span>
             </div>
 
           </motion.div>
@@ -504,3 +463,4 @@ export default function Chatbot() {
     </div>
   );
 }
+

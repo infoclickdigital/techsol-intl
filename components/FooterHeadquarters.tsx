@@ -53,22 +53,22 @@ export default function FooterHeadquarters({
 
   return (
     <div className="md:col-span-5 space-y-4 font-sans text-xs">
-      <h4 className="text-xs font-bold uppercase tracking-wider font-mono text-amber-500">
+      <h4 className="text-xs font-bold uppercase tracking-wider font-mono text-slate-900">
         Corporate Headquarters
       </h4>
-      <div className="space-y-3 font-normal text-slate-400 leading-relaxed">
+      <div className="space-y-3 font-medium text-slate-700 leading-relaxed">
         <div className="flex items-start gap-2.5">
           <MapPin className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
           <span>{address}</span>
         </div>
         <div className="flex items-start gap-2.5">
           <Phone className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
-          <span>Direct Desk: {phone}</span>
+          <span>Direct Desk: <a href={`tel:${phone}`} className="hover:text-amber-600 hover:underline font-semibold text-slate-900">{phone}</a></span>
         </div>
         <div className="flex items-start gap-2.5">
           <Mail className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
           <span>
-            Primary Desk: <a href={`mailto:${email}`} className="hover:text-amber-500 hover:underline">{email}</a>
+            Primary Desk: <a href={`mailto:${email}`} className="text-slate-900 font-semibold hover:text-amber-600 hover:underline">{email}</a>
           </span>
         </div>
         <div className="flex items-start gap-2.5">

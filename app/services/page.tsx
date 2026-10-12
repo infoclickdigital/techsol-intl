@@ -149,17 +149,17 @@ export default function ServicesPage() {
                     </div>
 
                     <div className="pt-4 border-t border-slate-100 flex flex-wrap gap-3 items-center justify-between">
-                      <div className="flex gap-2">
+                      <div className="flex gap-2.5">
                         <Link
                           href="/contact"
-                          className="bg-slate-900 hover:bg-amber-600 transition-all text-white font-black text-[10px] tracking-wider uppercase py-3 px-4 rounded-none inline-flex items-center gap-1.5"
+                          className="min-h-[44px] bg-slate-900 hover:bg-amber-600 transition-all text-white font-semibold text-xs tracking-wider uppercase px-4 py-2.5 rounded-lg inline-flex items-center gap-1.5 shadow-xs"
                         >
                           <span>Schedule Inspection</span>
-                          <ArrowRight className="h-3.5 w-3.5" />
+                          <ArrowRight className="h-4 w-4" />
                         </Link>
                         <Link
                           href={`/services/${srv.id}`}
-                          className="border border-slate-200 text-slate-700 hover:bg-slate-50 transition-all font-black text-[10px] tracking-wider uppercase py-3 px-4 rounded-none inline-flex items-center gap-1.5"
+                          className="min-h-[44px] border border-slate-200 text-slate-700 hover:bg-slate-50 transition-all font-semibold text-xs tracking-wider uppercase px-4 py-2.5 rounded-lg inline-flex items-center gap-1.5"
                         >
                           <span>Details</span>
                         </Link>
